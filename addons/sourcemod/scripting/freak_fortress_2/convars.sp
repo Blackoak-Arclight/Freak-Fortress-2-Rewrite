@@ -30,7 +30,7 @@ void ConVar_PluginStart()
 	Cvar[BossKnockback] = CreateConVar("ff2_boss_knockback", "0", "If v1 bosses can perform self-knockback by default, 2 will also allow self-damage", _, true, 0.0, true, 2.0);
 	Cvar[PrefBlacklist] = CreateConVar("ff2_pref_blacklist", "-1", "If boss selection whitelist is a blacklist instead with the limit being the value of this cvar", FCVAR_NOTIFY, true, -1.0);
 	Cvar[PrefToggle] = CreateConVar("ff2_pref_toggle", "1", "If players can opt out playing bosses and reset queue points", FCVAR_NOTIFY, true, 0.0, true, 1.0);
-	Cvar[CaptureTime] = CreateConVar("ff2_game_capture_time", "n*15 + 60", "Amount of time until the control point unlocks, similar to tf_arena_override_cap_enable_time, can be a formula");
+	Cvar[CaptureTime] = CreateConVar("ff2_game_capture_time", "n*5 + 45", "Amount of time until the control point unlocks, similar to tf_arena_override_cap_enable_time, can be a formula");
 	Cvar[CaptureAlive] = CreateConVar("ff2_game_capture_alive", "n/5", "Amount of players left alive until the control point unlocks, can be a formula");
 	Cvar[AggressiveSwap] = CreateConVar("ff2_aggressive_noswap", "0", "Block bosses changing teams, even from other plugins.\nOnly use if you have subplugin issues swapping teams, even then you should fix them anyways", _, true, 0.0, true, 1.0);
 	Cvar[AggressiveOverlay] = CreateConVar("ff2_aggressive_overlay", "0", "Force clears overlays on death and round end.\nOnly use if you have subplugin issues not cleaing overlays, even then you should fix them anyways", _, true, 0.0, true, 1.0);
@@ -39,14 +39,14 @@ void ConVar_PluginStart()
 	Cvar[PrefSpecial] = CreateConVar("ff2_pref_special", "0.0", "If non-zero, difficulties will be randomly applied onto a boss based on the chance set", FCVAR_NOTIFY, true, 0.0, true, 1.0);
 	Cvar[Telefrags] = CreateConVar("ff2_game_telefrag", "5000", "How much damage telefrags do on bosses");
 	Cvar[SubpluginFolder] = CreateConVar("ff2_plugin_subplugins", "freaks", "Folder to load/unload when bosses are at play relative to the plugins folder");
-	Cvar[FileCheck] = CreateConVar("ff2_plugin_checkfiles", "1", "If to check and warn about missing files from bosses (Disabling this can help load times)", _, true, 0.0, true, 1.0);
-	Cvar[PackVotes] = CreateConVar("ff2_plugin_packvotes", "1", "If to host a boss pack vote when the next map is set", _, true, 0.0, true, 1.0);
+	Cvar[FileCheck] = CreateConVar("ff2_plugin_checkfiles", "0", "If to check and warn about missing files from bosses (Disabling this can help load times)", _, true, 0.0, true, 1.0);
+	Cvar[PackVotes] = CreateConVar("ff2_plugin_packvotes", "0", "If to host a boss pack vote when the next map is set", _, true, 0.0, true, 1.0);
 	Cvar[StreakDamage] = CreateConVar("ff2_game_streakdamage", "400", "Amount of damage against a boss to display as a kill", _, true, 1.0);
 	Cvar[Teutons] = CreateConVar("ff2_game_teutons", "0", "If to enable dead roaming players when possible", _, true, 0.0, true, 1.0);
-	Cvar[CaptureDome] = CreateConVar("ff2_game_capture_dome", "0.0", "How much time until a dome closes in onto the control point, 0 to disabled", _, true, 0.0);
-	Cvar[RankingStyle] = CreateConVar("ff2_game_ranks", "0", "Show ranks based on wins as a boss, 1 = Personal Only, 2 = Display To All", FCVAR_NOTIFY, true, 0.0, true, 2.0);
-	Cvar[RankingLose] = CreateConVar("ff2_game_ranks_lose", "0", "Rank loss method when losing as a boss, 0 = None, 0.0-1.0 = When Less Then Players Killed Ratio, # = Ranks Loss", _, true, 0.0);
-	Cvar[RankingStats] = CreateConVar("ff2_game_ranks_stats", "0.0", "Boss health precentage multiplicative decrease per rank", _, true, 0.0, true, 0.9);
+	Cvar[CaptureDome] = CreateConVar("ff2_game_capture_dome", "60.0", "How much time until a dome closes in onto the control point, 0 to disabled", _, true, 0.0);
+	Cvar[RankingStyle] = CreateConVar("ff2_game_ranks", "2", "Show ranks based on wins as a boss, 1 = Personal Only, 2 = Display To All", FCVAR_NOTIFY, true, 0.0, true, 2.0);
+	Cvar[RankingLose] = CreateConVar("ff2_game_ranks_lose", "1", "Rank loss method when losing as a boss, 0 = None, 0.0-1.0 = When Less Then Players Killed Ratio, # = Ranks Loss", _, true, 0.0);
+	Cvar[RankingStats] = CreateConVar("ff2_game_ranks_stats", "0.04", "Boss health precentage multiplicative decrease per rank", _, true, 0.0, true, 0.9);
 	Cvar[CaptureDomeTime] = CreateConVar("ff2_game_capture_dome_time", "0.0", "Override control point capture time, 0 for map default", _, true, 0.0);
 	Cvar[CaptureDomeStyle] = CreateConVar("ff2_game_capture_dome_style", "1.0", "Determines how the capture would work when dome activated.\n0 = capturing the dome only changes the team owning the control point\n1 = capturing the dome results in victory of the team that captured the control point", _, true, 0.0, true, 1.0);
 	Cvar[CaptureDomeRadius] = CreateConVar("ff2_game_capture_dome_radius", "0.0", "How much radius of dome closes in. 0 for default", _, true, 0.0);
@@ -55,8 +55,6 @@ void ConVar_PluginStart()
 	CreateConVar("ff2_oldjump", "1", "Backwards Compatibility ConVar", FCVAR_DONTRECORD|FCVAR_HIDDEN, true, 0.0, true, 1.0);
 	CreateConVar("ff2_base_jumper_stun", "0", "Backwards Compatibility ConVar", FCVAR_DONTRECORD|FCVAR_HIDDEN, true, 0.0, true, 1.0);
 	CreateConVar("ff2_solo_shame", "1", "Backwards Compatibility ConVar", FCVAR_DONTRECORD|FCVAR_HIDDEN, true, 0.0, true, 1.0);
-	
-	AutoExecConfig(false, "FF2Rewrite");
 	
 	Cvar[AllowSpectators] = FindConVar("mp_allowspectators");
 	Cvar[FriendlyFire] = FindConVar("mp_friendlyfire");
@@ -78,81 +76,8 @@ void ConVar_PluginStart()
 
 void ConVar_ConfigsExecuted()
 {
-	bool generate = !FileExists("cfg/sourcemod/FF2Rewrite.cfg");
-	
-	if(!generate)
-	{
-		char buffer[512];
-		Cvar[Version].GetString(buffer, sizeof(buffer));
-		if(!StrEqual(buffer, PLUGIN_VERSION_FULL))
-		{
-			if(buffer[0])
-				generate = true;
-			
-			Cvar[Version].SetString(PLUGIN_VERSION_FULL);
-		}
-	}
-	
-	if(generate)
-		GenerateConfig();
-	
 	if(Enabled)
 		ConVar_Enable();
-}
-
-static void GenerateConfig()
-{
-	File file = OpenFile("cfg/sourcemod/FF2Rewrite.cfg", "wt");
-	if(file)
-	{
-		file.WriteLine("// Settings present are for Freak Fortress 2: Rewrite (" ... PLUGIN_VERSION ... "." ... PLUGIN_VERSION_REVISION ... ")");
-		file.WriteLine("// Updating the plugin version will generate new cvars and any non-FF2 commands will be lost");
-		file.WriteLine("ff2_version \"" ... PLUGIN_VERSION_FULL ... "\"");
-		file.WriteLine(NULL_STRING);
-		
-		char buffer1[512], buffer2[256];
-		for(int i; i < AllowSpectators; i++)
-		{
-			if(Cvar[i].Flags & FCVAR_DONTRECORD)
-				continue;
-			
-			Cvar[i].GetDescription(buffer1, sizeof(buffer1));
-			
-			int current, split;
-			do
-			{
-				split = SplitString(buffer1[current], "\n", buffer2, sizeof(buffer2));
-				if(split == -1)
-				{
-					file.WriteLine("// %s", buffer1[current]);
-					break;
-				}
-				
-				file.WriteLine("// %s", buffer2);
-				current += split;
-			}
-			while(split != -1);
-			
-			file.WriteLine("// -");
-			
-			Cvar[i].GetDefault(buffer2, sizeof(buffer2));
-			file.WriteLine("// Default: \"%s\"", buffer2);
-			
-			float value;
-			if(Cvar[i].GetBounds(ConVarBound_Lower, value))
-				file.WriteLine("// Minimum: \"%.2f\"", value);
-			
-			if(Cvar[i].GetBounds(ConVarBound_Upper, value))
-				file.WriteLine("// Maximum: \"%.2f\"", value);
-			
-			Cvar[i].GetName(buffer2, sizeof(buffer2));
-			Cvar[i].GetString(buffer1, sizeof(buffer1));
-			file.WriteLine("%s \"%s\"", buffer2, buffer1);
-			file.WriteLine(NULL_STRING);
-		}
-		
-		delete file;
-	}
 }
 
 static void ConVar_Add(const char[] name, const char[] value, bool enforce = true)

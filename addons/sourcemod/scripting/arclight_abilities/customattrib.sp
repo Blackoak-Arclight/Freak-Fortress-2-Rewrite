@@ -127,7 +127,13 @@ stock Action CustomAttrib_PlayerTakeDamage(int victim, int &attacker, int &infli
 		}
 
 		if(Attrib_Get(weapon, "ignite on hit", _, value))
-			TF2_IgnitePlayer(victim, attacker, value);
+		{
+			DataPack pack = new DataPack();
+			pack.WriteCell(GetClientUserId(victim));
+			pack.WriteCell(GetClientUserId(attacker));
+			pack.WriteFloat(value);
+			RequestFrame(IgniteFrame, pack);
+		}
 
 		if(Attrib_Get(weapon, "extra damage falloff", _, value))
 		{
@@ -157,6 +163,22 @@ stock Action CustomAttrib_PlayerTakeDamage(int victim, int &attacker, int &infli
 	}
 
 	return action;
+}
+
+static void IgniteFrame(DataPack pack)
+{
+	pack.Reset();
+	int victim = GetClientOfUserId(pack.ReadCell());
+	if(victim)
+	{
+		int attacker = GetClientOfUserId(pack.ReadCell());
+		if(attacker)
+		{
+			TF2_IgnitePlayer(victim, attacker, pack.ReadFloat());
+		}
+	}
+
+	delete pack;
 }
 
 stock Action CustomAttrib_ObjectTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon)
@@ -299,6 +321,7 @@ void CustomAttrib_DeployBanner(int client)
 				{
 					ApplyTempAttribute(primary, "crits_become_minicrits", 1.0, 5.0);
 					SetEntProp(primary, Prop_Data, "m_iClip1", GetEntProp(primary, Prop_Data, "m_iClip1") + RoundFloat(value));
+					CreateTimer(5.0, Timer_ResetClip, EntIndexToEntRef(primary), TIMER_FLAG_NO_MAPCHANGE);
 				}
 			}
 		}
@@ -315,6 +338,18 @@ void CustomAttrib_DeployBanner(int client)
 			TF2_AddCondition(client, TFCond_Dazed, 0.001);
 		}
 	}
+}
+
+static Action Timer_ResetClip(Handle timer, int ref)
+{
+	int entity = EntRefToEntIndex(ref);
+	if(entity != -1)
+	{
+		if(GetEntProp(entity, Prop_Data, "m_iClip1") > 8)
+			SetEntProp(entity, Prop_Data, "m_iClip1", 8);
+	}
+
+	return Plugin_Continue;
 }
 
 static void SummonZombies(int client, int amount)
