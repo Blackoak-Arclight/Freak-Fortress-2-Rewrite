@@ -23,7 +23,7 @@ void Command_PluginStart()
 	AddCommandListener(Command_JoinTeam, "jointeam");
 	AddCommandListener(Command_AutoTeam, "autoteam");
 	AddCommandListener(Command_JoinClass, "joinclass");
-	AddCommandListener(Command_EurekaTeleport, "eureka_teleport");
+	//AddCommandListener(Command_EurekaTeleport, "eureka_teleport");
 }
 
 static bool FF2TargetFilter(const char[] pattern, ArrayList clients)

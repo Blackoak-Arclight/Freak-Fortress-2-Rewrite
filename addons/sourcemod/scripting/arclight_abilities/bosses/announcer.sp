@@ -87,7 +87,7 @@ Action Announcer_ConvertBuilding(int victim, int &attacker, float &damage, int &
 Action Announcer_PlayerTakeDamage(int victim, int &attacker, float &damage)
 {
 	// "Friendly" state
-	if(ConvertTimer[victim] || ConvertTimer[attacker])
+	if(ConvertTimer[victim] || (attacker < 1 && attacker >= MaxClients && ConvertTimer[attacker]))
 	{
 		damage = 0.0;
 		return Plugin_Handled;

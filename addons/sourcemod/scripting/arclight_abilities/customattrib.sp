@@ -220,14 +220,15 @@ void CustomAttrib_PlayerRunCmd(int client)
 
 void CustomAttrib_CalcIsAttackCritical(int client, int weapon)
 {
-	float value;
-	if(Attrib_Get(weapon, "wall climb", _, value))
+	float damage;
+	if(Attrib_Get(weapon, "wall climb", _, damage))
 	{
 		bool buffed = TF2_IsPlayerInCondition(client, TFCond_CritCola);
 
-		if(!buffed && GetClientHealth(client) <= RoundToCeil(value))
+		if(!buffed && GetClientHealth(client) <= RoundToCeil(damage))
 			return;
-
+		
+		float value;
 		if(!buffed && Attrib_Get(weapon, "wall climb limit", _, value))
 		{
 			if(RoundFloat(value) <= WallClimbCombo[client])
@@ -258,8 +259,8 @@ void CustomAttrib_CalcIsAttackCritical(int client, int weapon)
 				float dist = GetVectorDistance(pos, vec, true);
 				if(dist < 10000.0)
 				{
-					if(!buffed && value)
-						SDKHooks_TakeDamage(client, 0, client, value, DMG_PREVENT_PHYSICS_FORCE);
+					if(!buffed && damage)
+						SDKHooks_TakeDamage(client, 0, client, damage, DMG_PREVENT_PHYSICS_FORCE);
 					
 					float height = 1.0;
 					Attrib_Get(weapon, "wall climb height", _, value);
