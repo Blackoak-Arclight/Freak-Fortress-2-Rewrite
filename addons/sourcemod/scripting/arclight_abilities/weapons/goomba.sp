@@ -7,7 +7,13 @@
 
 #define GOOMBA_SOUND	"goomba/rebound.wav"
 
+static GlobalForward OnGoombaStomp;
 static float GoombaCooldown[MAXPLAYERS+1];
+
+void Goomba_PluginLoad()
+{
+	OnGoombaStomp = new GlobalForward("FF2R_Arclight_OnStomp", ET_Ignore, Param_Cell, Param_Cell);
+}
 
 void Goomba_MapStart()
 {
@@ -38,45 +44,50 @@ void Goomba_StartTouch(int client, int target)
 				{
 					GoombaCooldown[client] = gameTime;
 
-					if(Saxton_Stomp(client, target) >= Plugin_Handled)
-						return;
-
-					int health = GetClientHealth(target);
-
-					int clientWeight = (FF2R_GetBossData(client) ? 1 : 0) + (FF2R_GetClientMinion(client) ? -1 : 0);
-					int targetWeight = (FF2R_GetBossData(target) ? 1 : 0) + (FF2R_GetClientMinion(target) ? -1 : 0);
-
-					// If heavy, don't recoil
-					bool heavy = clientWeight > targetWeight;
-
-					SetKillIcon("taunt_scout", "goomba");
-					SDKHooks_TakeDamage(target, client, client, 500.0, DMG_PREVENT_PHYSICS_FORCE, .bypassHooks = false);
-					SetKillIcon();
-
-					pos1[2] += 45.0;
-					CreateParticleEffect("mini_fireworks", pos1, _, 5.0);
-					EmitSoundToAll(GOOMBA_SOUND, target, _, _, _, 0.6);
-
-					// If any change, recoil
-					if(!heavy && (!IsPlayerAlive(target) || health != GetClientHealth(target)))
+					if(Saxton_Stomp(client, target) < Plugin_Handled)
 					{
-						float ang[3];
-						GetClientEyeAngles(client, ang);
-						GetEntPropVector(client, Prop_Data, "m_vecVelocity", vel);
-						ang[0] = DegToRad(ang[0]);
-						ang[1] = DegToRad(ang[1]);
-						vel[0] = 300.0 * Cosine(ang[0]) * Cosine(ang[1]);
-						vel[1] = 300.0 * Cosine(ang[0]) * Sine(ang[1]);
-						vel[2] = 400.0;
+						int health = GetClientHealth(target);
 
-						DataPack pack = new DataPack();
-						pack.WriteCell(GetClientUserId(client));
-						for(int i; i < 3; i++)
+						int clientWeight = (FF2R_GetBossData(client) ? 1 : 0) + (FF2R_GetClientMinion(client) ? -1 : 0);
+						int targetWeight = (FF2R_GetBossData(target) ? 1 : 0) + (FF2R_GetClientMinion(target) ? -1 : 0);
+
+						// If heavy, don't recoil
+						bool heavy = clientWeight > targetWeight;
+
+						SetKillIcon("taunt_scout", "goomba");
+						SDKHooks_TakeDamage(target, client, client, 500.0, DMG_PREVENT_PHYSICS_FORCE, .bypassHooks = false);
+						SetKillIcon();
+
+						pos1[2] += 45.0;
+						CreateParticleEffect("mini_fireworks", pos1, _, 5.0);
+						EmitSoundToAll(GOOMBA_SOUND, target, _, _, _, 0.6);
+
+						// If any change, recoil
+						if(!heavy && (!IsPlayerAlive(target) || health != GetClientHealth(target)))
 						{
-							pack.WriteFloat(vel[i]);
+							float ang[3];
+							GetClientEyeAngles(client, ang);
+							GetEntPropVector(client, Prop_Data, "m_vecVelocity", vel);
+							ang[0] = DegToRad(ang[0]);
+							ang[1] = DegToRad(ang[1]);
+							vel[0] = 300.0 * Cosine(ang[0]) * Cosine(ang[1]);
+							vel[1] = 300.0 * Cosine(ang[0]) * Sine(ang[1]);
+							vel[2] = 400.0;
+
+							DataPack pack = new DataPack();
+							pack.WriteCell(GetClientUserId(client));
+							for(int i; i < 3; i++)
+							{
+								pack.WriteFloat(vel[i]);
+							}
+							RequestFrame(PushClientFrame, pack);
 						}
-						RequestFrame(PushClientFrame, pack);
 					}
+
+					Call_StartForward(OnGoombaStomp);
+					Call_PushCell(client);
+					Call_PushCell(target);
+					Call_Finish();
 				}
 			}
 		}

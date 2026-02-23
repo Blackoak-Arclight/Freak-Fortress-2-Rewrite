@@ -70,6 +70,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 {
 	// FF2 Files
 	Attrib_PluginLoad();
+	Goomba_PluginLoad();
 	TF2Items_PluginLoad();
 	TF2U_PluginLoad();
 	TFED_PluginLoad();
