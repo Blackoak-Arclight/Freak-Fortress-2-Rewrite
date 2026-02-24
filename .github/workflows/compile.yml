@@ -29,7 +29,7 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
       
       - name: Install Misc
-        run: bash scripts/setup.sh
+        run: bash .github/setup.sh
         working-directory: ./
       
       - name: Minimum Compile ${{ matrix.sm-version }}
@@ -40,7 +40,7 @@ jobs:
         working-directory: ${{ env.SCRIPTS_PATH }}
       
       - name: Install Optional Includes
-        run: bash scripts/optional.sh
+        run: bash .github/optional.sh
         working-directory: ./
       
       - name: Full Compile ${{ matrix.sm-version }}
