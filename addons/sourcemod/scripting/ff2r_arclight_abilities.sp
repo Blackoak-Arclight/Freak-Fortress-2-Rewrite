@@ -74,7 +74,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 	TF2Items_PluginLoad();
 	TF2U_PluginLoad();
 	TFED_PluginLoad();
-	VScript_PluginLoad();
 	return APLRes_Success;
 }
 
@@ -163,7 +162,6 @@ public void OnLibraryAdded(const char[] name)
 	Subplugin_LibraryAdded(name);
 	TF2U_LibraryAdded(name);
 	TFED_LibraryAdded(name);
-	VScript_LibraryAdded(name);
 }
 
 public void OnLibraryRemoved(const char[] name)
@@ -173,7 +171,6 @@ public void OnLibraryRemoved(const char[] name)
 	Subplugin_LibraryRemoved(name);
 	TF2U_LibraryRemoved(name);
 	TFED_LibraryRemoved(name);
-	VScript_LibraryRemoved(name);
 }
 
 public void OnClientPutInServer(int client)
