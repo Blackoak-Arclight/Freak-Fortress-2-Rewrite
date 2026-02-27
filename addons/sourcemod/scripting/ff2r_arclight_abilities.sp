@@ -137,7 +137,7 @@ public void OnPluginEnd()
 		if(IsClientInGame(client))
 		{
 			OnClientDisconnect(client);
-			if(FF2R_GetBossData(client))
+			if(Subplugin_Enabled() && FF2R_GetBossData(client))
 				FF2R_OnBossRemoved(client);
 		}
 	}
@@ -148,6 +148,8 @@ public void OnMapStart()
 	//CustomMelee_MapStart();
 	Goomba_MapStart();
 	Saxton_MapStart();
+	
+	ServerCommand("script_execute ff2r_arclight");
 }
 
 public void OnMapEnd()

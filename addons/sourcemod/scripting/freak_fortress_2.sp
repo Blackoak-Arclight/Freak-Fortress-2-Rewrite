@@ -37,7 +37,7 @@
 #define TFTeam_Blue		3
 #define TFTeam_MAX		4
 
-#define SNDVOL_BOSS	2.0
+#define SNDVOL_BOSS	1.0
 
 enum TFStatType_t
 {
