@@ -91,6 +91,12 @@ void CustomAttrib_AllPluginsLoaded()
 	attrib.SetCustom("description_ff2_string", "Damage is affected by range");
 	attrib.Register();
 
+	attrib.SetName("mod airblast any stale");
+	attrib.SetClass("ff2.stale_any_airblast_refire");
+	attrib.SetDescriptionFormat("additive");
+	attrib.SetCustom("description_ff2_string", "Successive airblasts increases airblast cooldown");
+	attrib.Register();
+
 	attrib.SetClass("arclight.displayonly");
 	attrib.SetDescriptionFormat("additive");
 	attrib.SetCustom("description_ff2_string", "%s");
@@ -290,12 +296,22 @@ void CustomAttrib_ProjectileTouch(int client, int weapon, int projectile)
 	float value;
 	if(Attrib_Get(weapon, "projectile explodes", _, value))
 	{
-		TF2_AddCondition(client, TFCond_Buffed, 0.01);
+		if(RoundFloat(Attrib_FindOnWeapon(client, weapon, "mod crit type on bosses")) == 1)
+			TF2_AddCondition(client, TFCond_Buffed, 0.01);
 
 		float pos[3];
 		GetEntPropVector(projectile, Prop_Send, "m_vecOrigin", pos);
 		TF2_Explode(client, pos, value, 150.0, "ExplosionCore_MidAir", "Weapon_Airstrike.Explosion");
+
+		RequestFrame(UnhookProjectileTouch, EntIndexToEntRef(projectile));
 	}
+}
+
+static void UnhookProjectileTouch(int ref)
+{
+	int entity = EntRefToEntIndex(ref);
+	if(entity != -1)
+		SDKHooks_UnhookProjectile(entity);
 }
 
 void CustomAttrib_DeployBanner(int client)
@@ -337,6 +353,23 @@ void CustomAttrib_DeployBanner(int client)
 			ApplyTempAttribute(weapon, "move speed bonus", value, 9.5);
 			ApplyTempAttribute(weapon, "ammo regen", 100.0, 10.1);
 			TF2_AddCondition(client, TFCond_Dazed, 0.001);
+		}
+	}
+}
+
+void CustomAttrib_ObjectDeflected(int attacker)
+{
+	int weapon = GetEntPropEnt(attacker, Prop_Send, "m_hActiveWeapon");
+	if(weapon != -1)
+	{
+		float value;
+		if(Attrib_Get(weapon, "mod airblast any stale", _, value))
+		{
+			SetEntProp(weapon, Prop_Send, "m_iAccountID", 0);
+			
+			float initial = 1.0;
+			Attrib_Get(weapon, "mult airblast refire time", 256, initial);
+			Attrib_Set(weapon, "mult airblast refire time", 256, initial + value);
 		}
 	}
 }

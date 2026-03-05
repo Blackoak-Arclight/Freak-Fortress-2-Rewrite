@@ -85,6 +85,7 @@ public void OnPluginStart()
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 	HookEvent("player_spawn", OnPlayerSpawn);
 	HookEvent("deploy_buff_banner", OnDeployBanner);
+	HookEvent("deploy_buff_banner", OnObjectDeflected);
 	
 	// FF2 Files
 	Attrib_PluginStart();
@@ -307,4 +308,13 @@ static void OnDeployBanner(Event event, const char[] name, bool dontBroadcast)
 	{
 		CustomAttrib_DeployBanner(client);
 	}
+}
+
+static Action OnObjectDeflected(Event event, const char[] name, bool dontBroadcast)
+{
+	int attacker = GetClientOfUserId(event.GetInt("userid"));
+	if(attacker)
+		CustomAttrib_ObjectDeflected(attacker);
+	
+	return Plugin_Continue;
 }

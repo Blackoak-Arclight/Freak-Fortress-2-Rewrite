@@ -82,6 +82,11 @@ void SDKHooks_EntityCreated(int entity, const char[] classname)
 	}
 }
 
+void SDKHooks_UnhookProjectile(int entity)
+{
+	SDKUnhook(entity, SDKHook_StartTouchPost, OnProjectileTouch);
+}
+
 static Action OnPreThink(int client)
 {
 	Saxton_PreThink(client);

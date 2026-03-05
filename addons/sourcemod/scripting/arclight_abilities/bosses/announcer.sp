@@ -6,6 +6,7 @@
 #pragma newdecls required
 
 static Handle ConvertTimer[MAXPLAYERS+1];
+static DataPack ConvertPack[MAXPLAYERS+1];
 
 void Announcer_PlayerSpawn(int client)
 {
@@ -13,6 +14,7 @@ void Announcer_PlayerSpawn(int client)
 	if(ConvertTimer[client])
 	{
 		SetEntityFlags(client, (GetEntityFlags(client) & ~FL_NOTARGET));
+		delete ConvertPack[client];
 		delete ConvertTimer[client];
 	}
 }
@@ -27,7 +29,7 @@ Action Announcer_ConvertPlayer(float time, int victim, int &attacker, float &dam
 		return Plugin_Changed;
 	}
 
-	if(ConvertTimer[victim])
+	if(ConvertTimer[victim] || ConvertTimer[attacker])
 	{
 		damage = 0.0;
 		return Plugin_Handled;
@@ -41,12 +43,12 @@ Action Announcer_ConvertPlayer(float time, int victim, int &attacker, float &dam
 	
 	SetEntityFlags(victim, (GetEntityFlags(victim) | FL_NOTARGET));
 
-	DataPack pack = new DataPack();
-	ConvertTimer[victim] = CreateTimer(0.0, AnnouncerSwapTimer, pack);
-	pack.WriteCell(victim);
-	pack.WriteCell(GetClientUserId(victim));
-	pack.WriteFloat(GetGameTime() + time);
-	pack.WriteCell(team);
+	ConvertPack[victim] = new DataPack();
+	ConvertTimer[victim] = CreateTimer(0.0, AnnouncerSwapTimer, victim);
+	ConvertPack[victim].WriteCell(victim);
+	ConvertPack[victim].WriteCell(GetClientUserId(victim));
+	ConvertPack[victim].WriteFloat(GetGameTime() + time);
+	ConvertPack[victim].WriteCell(team);
 
 	//Alert teammates, herself and unconverted minions that the victim is about to change teams
 	TFClassType class = TF2_GetPlayerClass(victim);
@@ -96,29 +98,30 @@ Action Announcer_PlayerTakeDamage(int victim, int &attacker, float &damage)
 	return Plugin_Continue;
 }
 
-static Action AnnouncerSwapTimer(Handle timer, DataPack pack)
+static Action AnnouncerSwapTimer(Handle timer, int client)
 {
-	pack.Reset();
-	int client = pack.ReadCell();
+	ConvertTimer[client] = null;
+	ConvertPack[client].Reset();
+	int userid = ConvertPack[client].ReadCell();
 
-	if(GetClientOfUserId(pack.ReadCell()))
+	if(GetClientOfUserId(userid))
 	{
 		if(IsPlayerAlive(client))
 		{
-			float convertAt = pack.ReadFloat();
+			float convertAt = ConvertPack[client].ReadFloat();
 			float gameTime = GetGameTime();
 
 			if(convertAt > gameTime)
 			{
 				int time = RoundToCeil(convertAt - gameTime);
 				PrintCenterText(client, "YOU'RE SWAPPING TEAMS IN %d SECOND%s", time, time > 1 ? "S" : "");
-				ConvertTimer[client] = CreateTimer(1.0, AnnouncerSwapTimer, pack);
+				ConvertTimer[client] = CreateTimer(1.0, AnnouncerSwapTimer, client);
 				return Plugin_Continue;
 			}
 
 			PrintCenterText(client, "YOU'RE NOW IN BOSS TEAM");
 			
-			int team = pack.ReadCell();
+			int team = ConvertPack[client].ReadCell();
 			
 			//Need to detach buildings from engineers before switching teams so they don't explode
 			int entity = MaxClients+1;
@@ -176,15 +179,24 @@ static Action AnnouncerSwapTimer(Handle timer, DataPack pack)
 			//Give crit resistance 
 			TF2_AddCondition(client, TFCond_DefenseBuffed);
 
-			// Prevent pickups
-			FF2R_SetClientMinion(client, true);
+			// Prevent pickups (later to let ammo pickup first)
+			ConvertTimer[client] = CreateTimer(0.1, AnnouncerSetMinionFlag, client);
 		}
 		
 		//Allow sentries to target this fella from now on
 		SetEntityFlags(client, (GetEntityFlags(client) & ~FL_NOTARGET));
 	}
 
+	delete ConvertPack[client];
+	return Plugin_Continue;
+}
+
+static Action AnnouncerSetMinionFlag(Handle timer, int client)
+{
 	ConvertTimer[client] = null;
+	if(IsClientInGame(client) && IsPlayerAlive(client))
+		FF2R_SetClientMinion(client, true);
+	
 	return Plugin_Continue;
 }
 
