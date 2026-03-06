@@ -29,7 +29,7 @@ Action Announcer_ConvertPlayer(float time, int victim, int &attacker, float &dam
 		return Plugin_Changed;
 	}
 
-	if(ConvertTimer[victim] || ConvertTimer[attacker])
+	if(ConvertTimer[victim])
 	{
 		damage = 0.0;
 		return Plugin_Handled;
@@ -45,7 +45,6 @@ Action Announcer_ConvertPlayer(float time, int victim, int &attacker, float &dam
 
 	ConvertPack[victim] = new DataPack();
 	ConvertTimer[victim] = CreateTimer(0.0, AnnouncerSwapTimer, victim);
-	ConvertPack[victim].WriteCell(victim);
 	ConvertPack[victim].WriteCell(GetClientUserId(victim));
 	ConvertPack[victim].WriteFloat(GetGameTime() + time);
 	ConvertPack[victim].WriteCell(team);
@@ -89,7 +88,7 @@ Action Announcer_ConvertBuilding(int victim, int &attacker, float &damage, int &
 Action Announcer_PlayerTakeDamage(int victim, int &attacker, float &damage)
 {
 	// "Friendly" state
-	if(ConvertTimer[victim] || (attacker < 1 && attacker >= MaxClients && ConvertTimer[attacker]))
+	if(ConvertTimer[victim] || (attacker > 0 && attacker <= MaxClients && ConvertTimer[attacker]))
 	{
 		damage = 0.0;
 		return Plugin_Handled;
@@ -102,9 +101,7 @@ static Action AnnouncerSwapTimer(Handle timer, int client)
 {
 	ConvertTimer[client] = null;
 	ConvertPack[client].Reset();
-	int userid = ConvertPack[client].ReadCell();
-
-	if(GetClientOfUserId(userid))
+	if(GetClientOfUserId(ConvertPack[client].ReadCell()))
 	{
 		if(IsPlayerAlive(client))
 		{
