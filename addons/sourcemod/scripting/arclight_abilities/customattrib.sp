@@ -159,12 +159,8 @@ stock Action CustomAttrib_PlayerTakeDamage(int victim, int &attacker, int &infli
 				damage /= nerf;
 			}
 		}
-	}
-	
-	if(attacker > 0 && attacker <= MaxClients)
-	{
-		value = Attrib_FindOnPlayer(attacker, "heal on any hit");
-		if(value)
+
+		if(Attrib_Get(weapon, "heal on any hit", _, value))
 			SetEntityHealth(attacker, GetClientHealth(attacker) + RoundFloat(value));
 	}
 

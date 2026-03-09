@@ -43,15 +43,15 @@ void ConVar_PluginStart()
 	Cvar[PackVotes] = CreateConVar("ff2_plugin_packvotes", "0", "If to host a boss pack vote when the next map is set", _, true, 0.0, true, 1.0);
 	Cvar[StreakDamage] = CreateConVar("ff2_game_streakdamage", "400", "Amount of damage against a boss to display as a kill", _, true, 1.0);
 	Cvar[Teutons] = CreateConVar("ff2_game_teutons", "0", "If to enable dead roaming players when possible", _, true, 0.0, true, 1.0);
-	Cvar[CaptureDome] = CreateConVar("ff2_game_capture_dome", "60.0", "How much time until a dome closes in onto the control point, 0 to disabled", _, true, 0.0);
+	Cvar[CaptureDome] = CreateConVar("ff2_game_capture_dome", "120.0", "How much time until a dome closes in onto the control point, 0 to disabled", _, true, 0.0);
 	Cvar[RankingStyle] = CreateConVar("ff2_game_ranks", "2", "Show ranks based on wins as a boss, 1 = Personal Only, 2 = Display To All", FCVAR_NOTIFY, true, 0.0, true, 2.0);
-	Cvar[RankingLose] = CreateConVar("ff2_game_ranks_lose", "1", "Rank loss method when losing as a boss, 0 = None, 0.0-1.0 = When Less Then Players Killed Ratio, # = Ranks Loss", _, true, 0.0);
+	Cvar[RankingLose] = CreateConVar("ff2_game_ranks_lose", "0.8", "Rank loss method when losing as a boss, 0 = None, 0.0-1.0 = When Less Then Players Killed Ratio, # = Ranks Loss", _, true, 0.0);
 	Cvar[RankingStats] = CreateConVar("ff2_game_ranks_stats", "0.04", "Boss health precentage multiplicative decrease per rank", _, true, 0.0, true, 0.9);
 	Cvar[CaptureDomeTime] = CreateConVar("ff2_game_capture_dome_time", "15.0", "Override control point capture time, 0 for map default", _, true, 0.0);
 	Cvar[CaptureDomeStyle] = CreateConVar("ff2_game_capture_dome_style", "0", "Determines how the capture would work when dome activated.\n0 = capturing the dome only changes the team owning the control point\n1 = capturing the dome results in victory of the team that captured the control point", _, true, 0.0, true, 1.0);
 	Cvar[CaptureDomeRadius] = CreateConVar("ff2_game_capture_dome_radius", "0.0", "How much radius of dome closes in. 0 for default", _, true, 0.0);
 	Cvar[BossTeam] = CreateConVar("ff2_game_bossteam", "3", "Default team to use for bosses, 2 = RED, 3 = BLU", _, true, 2.0, true, float(TFTeam_MAX - 1));
-	Cvar[MusicPlaylist] = CreateConVar("ff2_game_playlist", "1", "If to allow players to select any boss theme to listen to", _, true, 0.0, true, 1.0);
+	Cvar[MusicPlaylist] = CreateConVar("ff2_game_playlist", "0", "If to allow players to select any boss theme to listen to", _, true, 0.0, true, 1.0);
 
 	CreateConVar("ff2_oldjump", "1", "Backwards Compatibility ConVar", FCVAR_DONTRECORD|FCVAR_HIDDEN, true, 0.0, true, 1.0);
 	CreateConVar("ff2_base_jumper_stun", "0", "Backwards Compatibility ConVar", FCVAR_DONTRECORD|FCVAR_HIDDEN, true, 0.0, true, 1.0);
