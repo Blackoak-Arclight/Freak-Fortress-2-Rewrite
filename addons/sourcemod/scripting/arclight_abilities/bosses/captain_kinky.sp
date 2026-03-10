@@ -60,6 +60,7 @@ void CK_Ability(int client, const char[] ability, AbilityData cfg)
 		SetEntProp(client, Prop_Send, "m_bDucked", true);
 		SetEntityFlags(client, GetEntityFlags(client)|FL_DUCKING);
 		f_JorkParticleCooldown[client] = 0.0;
+		FF2R_DoBossSlot(client, 12);
 	}
 }
 
