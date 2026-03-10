@@ -1069,3 +1069,69 @@ bool TraceRay_DontHitPlayersAndObjects(int entity, int contentsMask, int data)
 	GetEntityClassname(entity, classname, sizeof(classname));
 	return StrContains(classname, "obj_") != 0;
 }
+
+
+stock void SetForceButtonState(int client, bool apply, int button_flag)
+{
+	int Buttons = GetEntProp(client, Prop_Data, "m_afButtonForced");
+
+	if(apply)
+	{
+		Buttons |= button_flag;
+	}
+	else
+	{
+		Buttons &= ~button_flag;
+	}
+	SetEntProp(client, Prop_Data, "m_afButtonForced", Buttons);
+}
+stock void TF2_RemoveItem(int client, int weapon)
+{
+	/*if(TF2_IsWearable(weapon))
+	{
+		TF2_RemoveWearable(client, weapon);
+		return;
+	}*/
+
+	int entity = GetEntPropEnt(weapon, Prop_Send, "m_hExtraWearable");
+	if(entity != -1)
+		TF2_RemoveWearable(client, entity);
+
+	entity = GetEntPropEnt(weapon, Prop_Send, "m_hExtraWearableViewModel");
+	if(entity != -1)
+		TF2_RemoveWearable(client, entity);
+
+	RemovePlayerItem(client, weapon);
+	RemoveEntity(weapon);
+}
+stock float fmax(float n1, float n2)
+{
+	return n1 > n2 ? n1 : n2;
+}
+
+stock int ParticleEffectAt(float position[3], const char[] effectName, float duration = 0.1)
+{
+	int particle = CreateEntityByName("info_particle_system");
+	if (particle != -1)
+	{
+		TeleportEntity(particle, position, NULL_VECTOR, NULL_VECTOR);
+		SetEntPropFloat(particle, Prop_Data, "m_flSimulationTime", GetGameTime());
+		DispatchKeyValue(particle, "targetname", "rpg_fortress");
+		if(effectName[0])
+			DispatchKeyValue(particle, "effect_name", effectName);
+		else
+			DispatchKeyValue(particle, "effect_name", "3rd_trail");
+
+		DispatchSpawn(particle);
+		if(effectName[0])
+		{
+			ActivateEntity(particle);
+			AcceptEntityInput(particle, "start");
+		}
+		SetEdictFlags(particle, (GetEdictFlags(particle) & ~FL_EDICT_ALWAYS));	
+		//if it has no effect name, then it should always display, as its for other reasons.
+		if (duration > 0.0)
+			CreateTimer(duration, Timer_RemoveEntity, EntIndexToEntRef(particle), TIMER_FLAG_NO_MAPCHANGE);
+	}
+	return particle;
+}

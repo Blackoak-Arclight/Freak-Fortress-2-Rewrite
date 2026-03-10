@@ -2024,6 +2024,7 @@ Action Timer_RageStun(Handle timer, DataPack pack)
 		float maxduration = GetFormula(cfg, "max", alive, duration);
 		float addduration = GetFormula(cfg, "add", alive, 0.0);
 		float soloduration = GetFormula(cfg, "solo", alive, duration);
+		bool madmilk = cfg.GetBool("madmilk");
 		
 		char particle[48];
 		cfg.GetString("particle", particle, sizeof(particle), "yikes_fx");
@@ -2104,6 +2105,10 @@ Action Timer_RageStun(Handle timer, DataPack pack)
 					TF2Tools_RemoveCondition(victim[i], TFCond_Parachute);
 				
 				TF2Tools_StunPlayer(victim[i], duration * GetPlayerStunMulti(victim[i]), slowdown, flags, sound ? client : 0);
+				if(madmilk)
+				{
+					TF2Tools_AddCondition(victim[i], TFCond_Milked, (duration * GetPlayerStunMulti(victim[i]) * 2.0));
+				}
 				
 				if(particle[0])
 					AttachParticle(victim[i], particle, duration);

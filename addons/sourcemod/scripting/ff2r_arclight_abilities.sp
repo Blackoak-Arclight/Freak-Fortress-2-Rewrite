@@ -49,6 +49,7 @@ ConVar CvarFriendlyFire;
 
 #include "arclight_abilities/weapons/goomba.sp"
 
+#include "arclight_abilities/bosses/captain_kinky.sp"
 #include "arclight_abilities/bosses/announcer.sp"
 #include "arclight_abilities/bosses/hhh.sp"
 #include "arclight_abilities/bosses/improved_saxton.sp"
@@ -238,6 +239,7 @@ public void FF2R_OnAbility(int client, const char[] ability, AbilityData cfg)
 {
 	HHH_Ability(client, ability, cfg);
 	Rock_Ability(client, ability, cfg);
+	CK_Ability(client, ability, cfg);
 	Sarysapub1_Ability(client, ability, cfg);
 	Saxton_Ability(client, ability);
 	Spellbook_Ability(client, ability, cfg);

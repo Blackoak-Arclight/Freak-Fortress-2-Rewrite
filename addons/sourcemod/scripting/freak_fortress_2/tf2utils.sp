@@ -158,7 +158,7 @@ stock void TF2U_SetPlayerActiveWeapon(int client, int entity)
 	{
 		char buffer[36];
 		GetEntityClassname(entity, buffer, sizeof(buffer));
-		ClientCommand(client, "use %s", buffer);
+		FakeClientCommand(client, "use %s", buffer);
 	}
 }
 

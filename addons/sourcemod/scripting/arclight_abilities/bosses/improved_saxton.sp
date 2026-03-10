@@ -829,7 +829,7 @@ static void SL_HitSoundsAndEffects(int clientIdx, int victim, float victimPos[3]
 	if (!IsEmptyString(SL_HitEffect))
 	{
 		victimPos[2] += 41.5;
-		ParticleEffectAt(victimPos, SL_HitEffect, 1.0);
+		ParticleEffectAt_Saxton(victimPos, SL_HitEffect, 1.0);
 		victimPos[2] -= 41.5;
 	}
 }
@@ -1196,9 +1196,9 @@ static void SS_PreThink(int clientIdx)
 				}
 	
 				if (!IsEmptyString(effect1))
-					ParticleEffectAt(halePos, effect1, 1.0);
+					ParticleEffectAt_Saxton(halePos, effect1, 1.0);
 				if (!IsEmptyString(effect2))
-					ParticleEffectAt(halePos, effect2, 1.0);
+					ParticleEffectAt_Saxton(halePos, effect2, 1.0);
 				
 				for (int victim = 1; victim <= MaxClients; victim++)
 				{
@@ -1615,7 +1615,7 @@ Action Saxton_PlayerRunCmd(int clientIdx, int& buttons)
 /**
  * General helper statics, some original, some taken/modified from other sources
  */
-static int ParticleEffectAt(float position[3], char[] effectName, float duration = 0.1)
+static int ParticleEffectAt_Saxton(float position[3], char[] effectName, float duration = 0.1)
 {
 	if (strlen(effectName) < 3)
 		return -1; // nothing to display
@@ -1783,10 +1783,6 @@ static float fmin(float n1, float n2)
 	return n1 < n2 ? n1 : n2;
 }
 
-static float fmax(float n1, float n2)
-{
-	return n1 > n2 ? n1 : n2;
-}
 
 static int ReadHexOrDecInt(char[] hexOrDecString)
 {
