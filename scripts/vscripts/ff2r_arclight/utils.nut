@@ -125,3 +125,26 @@ function SetBossCharge(hPlayer, slot, flAmount)
 {
 	FF2_PushBossKey(hPlayer, "charge" + slot, flAmount)
 }
+
+function RemoveItem(hClient, hItem)
+{
+	local hEntity = GetPropEntity(hItem, "m_hExtraWearable");
+	if(hEntity != null)
+		hEntity.Kill()
+
+	hEntity = GetPropEntity(hItem, "m_hExtraWearableViewModel")
+	if(hEntity != null)
+		hEntity.Kill()
+
+	local iLength = GetPropArraySize(hClient, "m_hMyWeapons")
+	for(local i = 0; i < iLength; i++)
+	{
+		if(GetPropEntityArray(hClient, "m_hMyWeapons", i) == hItem)
+		{
+			SetPropEntityArray(hClient, "m_hMyWeapons", null, i)
+			break
+		}
+	}
+
+	hItem.Kill()
+}

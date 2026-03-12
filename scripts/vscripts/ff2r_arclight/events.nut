@@ -23,3 +23,13 @@ function OnScriptHook_OnTakeDamage(params)
 	Abilities_OnTakeDamage(params)
 	Attributes_OnTakeDamage(params)
 }
+
+function OnScriptHook_FF2_OnBossRemoved(params)
+{
+	Abilities_Call(params, "OnRemoved")
+}
+
+function OnGameEvent_FF2_OnWeaponChanged(params)
+{
+	Attributes_Call(params.client, params.weapon, "OnEquipped")
+}
