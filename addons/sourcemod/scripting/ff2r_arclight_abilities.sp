@@ -1,5 +1,5 @@
 #include <sourcemod>
-#include <virtual_address>
+#tryinclude <virtual_address>
 #include <sdkhooks>
 #include <tf2_stocks>
 //#include <dhooks>
