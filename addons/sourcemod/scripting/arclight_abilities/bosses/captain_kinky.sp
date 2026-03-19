@@ -47,6 +47,7 @@ void CK_Ability(int client, const char[] ability, AbilityData cfg)
 			Attrib_Set(weapon, "clip size bonus upgrade", _, 5.0);
 			Attrib_Set(weapon, "Reload time decreased", _, 1.0);
 			Attrib_Set(weapon, "deploy time decreased", _, 0.01);
+			Attrib_Set(weapon, "cannot be backstabbed", _, 1.0);
 			i_JorkingWeaponIndex[client] = EntIndexToEntRef(weapon);
 			TF2U_SetPlayerActiveWeapon(client, weapon);
 			Attrib_Set(weapon, "disable weapon switch", _, 1.0);
