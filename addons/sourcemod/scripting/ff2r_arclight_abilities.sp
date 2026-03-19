@@ -1,5 +1,5 @@
 #include <sourcemod>
-#include <virtual_address>
+#tryinclude <virtual_address>
 #include <sdkhooks>
 #include <tf2_stocks>
 //#include <dhooks>
@@ -150,8 +150,6 @@ public void OnMapStart()
 	//CustomMelee_MapStart();
 	Goomba_MapStart();
 	Saxton_MapStart();
-	
-	ServerCommand("script_execute ff2r_arclight");
 }
 
 public void OnMapEnd()

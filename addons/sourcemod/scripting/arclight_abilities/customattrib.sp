@@ -115,9 +115,34 @@ stock Action CustomAttrib_PlayerTakeDamage(int victim, int &attacker, int &infli
 	float value;
 	if(weapon != -1 && HasEntProp(weapon, Prop_Send, "m_AttributeList"))
 	{
-		if(Attrib_Get(weapon, "convert team on hit", _, value))
+		if(victim != attacker)
 		{
-			UpdateAction(action, Announcer_ConvertPlayer(value, victim, attacker, damage, damagetype, weapon, critType));
+			if(Attrib_Get(weapon, "convert team on hit", _, value))
+			{
+				UpdateAction(action, Announcer_ConvertPlayer(value, victim, attacker, damage, damagetype, weapon, critType));
+			}
+
+			if(Attrib_Get(weapon, "extra damage falloff", _, value))
+			{
+				float pos1[3], pos2[3];
+				GetClientAbsOrigin(victim, pos1);
+				GetClientAbsOrigin(attacker, pos2);
+
+				value *= value;
+
+				float distance = GetVectorDistance(pos1, pos2, true);
+				if(distance > value)
+				{
+					float nerf = 1.0 + ((((distance - value) / value)) * 0.5);
+					if(nerf > 2.0)
+						nerf = 2.0;
+					
+					damage /= nerf;
+				}
+			}
+
+			if(Attrib_Get(weapon, "heal on any hit", _, value))
+				SetEntityHealth(attacker, GetClientHealth(attacker) + RoundFloat(value));
 		}
 
 		if(Attrib_Get(weapon, "add damagetype", _, value))
@@ -140,28 +165,6 @@ stock Action CustomAttrib_PlayerTakeDamage(int victim, int &attacker, int &infli
 			pack.WriteFloat(value);
 			RequestFrame(IgniteFrame, pack);
 		}
-
-		if(Attrib_Get(weapon, "extra damage falloff", _, value))
-		{
-			float pos1[3], pos2[3];
-			GetClientAbsOrigin(victim, pos1);
-			GetClientAbsOrigin(attacker, pos2);
-
-			value *= value;
-
-			float distance = GetVectorDistance(pos1, pos2, true);
-			if(distance > value)
-			{
-				float nerf = 1.0 + ((((distance - value) / value)) * 0.5);
-				if(nerf > 2.0)
-					nerf = 2.0;
-				
-				damage /= nerf;
-			}
-		}
-
-		if(Attrib_Get(weapon, "heal on any hit", _, value))
-			SetEntityHealth(attacker, GetClientHealth(attacker) + RoundFloat(value));
 	}
 
 	return action;

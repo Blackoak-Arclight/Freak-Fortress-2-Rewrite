@@ -14,6 +14,8 @@ if(!("ConstantNamingConvention" in CONST))
 
 IncludeScript("ff2r_arclight/consts", ROOT)
 IncludeScript("ff2r_arclight/utils", ROOT)
+IncludeScript("ff2r_arclight/abilities", ROOT)
+IncludeScript("ff2r_arclight/attributes", ROOT)
 
 if("ArclightFF2Events" in ROOT)
 {
