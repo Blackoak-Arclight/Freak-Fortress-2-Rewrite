@@ -29,7 +29,14 @@ function OnScriptHook_FF2_OnBossRemoved(params)
 	Abilities_Call(params, "OnRemoved")
 }
 
-function OnGameEvent_FF2_OnWeaponChanged(params)
+function OnScriptHook_FF2_OnWeaponChanged(params)
 {
 	Attributes_Call(params.client, params.weapon, "OnEquipped")
+}
+
+function OnGameEvent_post_inventory_application(params)
+{
+	local hPlayer = GetPlayerFromUserID(params.userid)
+	if(hPlayer != null)
+		EntFireByHandle(hPlayer, "RunScriptCode", "Attributes_CallDelayed()", 0.1, null, null)
 }

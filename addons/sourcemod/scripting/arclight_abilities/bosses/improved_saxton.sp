@@ -181,28 +181,28 @@ static bool PluginActiveThisRound = false;
 #define SL_VERIFICATION_INTERVAL 0.05
 #define SL_SOLIDIFY_INTERVAL 0.05
 static bool SL_ActiveThisRound;
-static bool SL_CanUse[MAXPLAYERS+1];
-static bool SL_IsUsing[MAXPLAYERS+1]; // internal
-static bool SL_KeyDown[MAXPLAYERS+1]; // internal
-static float SL_InitialYaw[MAXPLAYERS+1]; // internal
-static float SL_InitialPitch[MAXPLAYERS+1]; // internal, needed only for speed verification and proper push renewal
-static float SL_OnCooldownUntil[MAXPLAYERS+1]; // internal
-static float SL_NextPushAt[MAXPLAYERS+1]; // internal
-static float SL_GraceEndsAt[MAXPLAYERS+1]; // internal
-static float SL_ForceRageEndAt[MAXPLAYERS+1]; // internal
-static bool SL_AlreadyHit[MAXPLAYERS+1]; // internal, victim use
+static bool SL_CanUse[MAXTF2PLAYERS];
+static bool SL_IsUsing[MAXTF2PLAYERS]; // internal
+static bool SL_KeyDown[MAXTF2PLAYERS]; // internal
+static float SL_InitialYaw[MAXTF2PLAYERS]; // internal
+static float SL_InitialPitch[MAXTF2PLAYERS]; // internal, needed only for speed verification and proper push renewal
+static float SL_OnCooldownUntil[MAXTF2PLAYERS]; // internal
+static float SL_NextPushAt[MAXTF2PLAYERS]; // internal
+static float SL_GraceEndsAt[MAXTF2PLAYERS]; // internal
+static float SL_ForceRageEndAt[MAXTF2PLAYERS]; // internal
+static bool SL_AlreadyHit[MAXTF2PLAYERS]; // internal, victim use
 static float SL_TrySolidifyAt; // internal
 static int SL_TrySolidifyBossClientIdx; // static internal
-static int SL_DesiredKey[MAXPLAYERS+1]; // based on arg1
-static float SL_Cooldown[MAXPLAYERS+1]; // arg2
-static float SL_RageCost[MAXPLAYERS+1]; // arg3
-static float SL_Velocity[MAXPLAYERS+1]; // arg4
-static float SL_Damage[MAXPLAYERS+1]; // arg5
-static bool SL_DestroyBuildings[MAXPLAYERS+1]; // arg6
-static float SL_BaseKnockback[MAXPLAYERS+1]; // arg7
-static float SL_CollisionDistance[MAXPLAYERS+1]; // arg8
-static float SL_CollisionHeight[MAXPLAYERS+1]; // arg9
-static float SL_CollisionRadius[MAXPLAYERS+1]; // arg10
+static int SL_DesiredKey[MAXTF2PLAYERS]; // based on arg1
+static float SL_Cooldown[MAXTF2PLAYERS]; // arg2
+static float SL_RageCost[MAXTF2PLAYERS]; // arg3
+static float SL_Velocity[MAXTF2PLAYERS]; // arg4
+static float SL_Damage[MAXTF2PLAYERS]; // arg5
+static bool SL_DestroyBuildings[MAXTF2PLAYERS]; // arg6
+static float SL_BaseKnockback[MAXTF2PLAYERS]; // arg7
+static float SL_CollisionDistance[MAXTF2PLAYERS]; // arg8
+static float SL_CollisionHeight[MAXTF2PLAYERS]; // arg9
+static float SL_CollisionRadius[MAXTF2PLAYERS]; // arg10
 // arg11 only used at rage time
 static char SL_HitSound[80]; // arg12, shared
 static char SL_HitEffect[48]; // arg13
@@ -220,33 +220,33 @@ static char SL_WeighdownError[256]; // arg19
 #define SS_EFFECT_GROUNDPOUND1 "hammer_impact_button_dust2"
 #define SS_EFFECT_GROUNDPOUND2 "hammer_impact_button_ring"
 static bool SS_ActiveThisRound;
-static bool SS_CanUse[MAXPLAYERS+1];
-static bool SS_IsUsing[MAXPLAYERS+1]; // internal
-static bool SS_KeyDown[MAXPLAYERS+1]; // internal
-static float SS_PreparingUntil[MAXPLAYERS+1]; // internal
-static float SS_TauntingUntil[MAXPLAYERS+1]; // internal
-static float SS_OnCooldownUntil[MAXPLAYERS+1]; // internal
-static float SS_NoSlamUntil[MAXPLAYERS+1]; // internal, workaround for a bug where slam sometimes happens in midair
-static bool SS_WasFirstPerson[MAXPLAYERS+1]; // internal
-static int SS_DesiredKey[MAXPLAYERS+1]; // based on arg1
-static float SS_Cooldown[MAXPLAYERS+1]; // arg2
-static float SS_RageCost[MAXPLAYERS+1]; // arg3
-static float SS_PropDelay[MAXPLAYERS+1]; // arg5
+static bool SS_CanUse[MAXTF2PLAYERS];
+static bool SS_IsUsing[MAXTF2PLAYERS]; // internal
+static bool SS_KeyDown[MAXTF2PLAYERS]; // internal
+static float SS_PreparingUntil[MAXTF2PLAYERS]; // internal
+static float SS_TauntingUntil[MAXTF2PLAYERS]; // internal
+static float SS_OnCooldownUntil[MAXTF2PLAYERS]; // internal
+static float SS_NoSlamUntil[MAXTF2PLAYERS]; // internal, workaround for a bug where slam sometimes happens in midair
+static bool SS_WasFirstPerson[MAXTF2PLAYERS]; // internal
+static int SS_DesiredKey[MAXTF2PLAYERS]; // based on arg1
+static float SS_Cooldown[MAXTF2PLAYERS]; // arg2
+static float SS_RageCost[MAXTF2PLAYERS]; // arg3
+static float SS_PropDelay[MAXTF2PLAYERS]; // arg5
 static char SS_PropModel[128]; // arg6
-static float SS_GravityDelay[MAXPLAYERS+1]; // arg7
-static float SS_GravitySetting[MAXPLAYERS+1]; // arg8
-static float SS_MaxDamage[MAXPLAYERS+1]; // arg9
-static float SS_Radius[MAXPLAYERS+1]; // arg10
-static float SS_DamageDecayExponent[MAXPLAYERS+1]; // arg11
-static float SS_BuildingDamageFactor[MAXPLAYERS+1]; // arg12
-static float SS_Knockback[MAXPLAYERS+1]; // arg13
-static float SS_PitchConstraint[MAXPLAYERS+1][2]; // arg14
+static float SS_GravityDelay[MAXTF2PLAYERS]; // arg7
+static float SS_GravitySetting[MAXTF2PLAYERS]; // arg8
+static float SS_MaxDamage[MAXTF2PLAYERS]; // arg9
+static float SS_Radius[MAXTF2PLAYERS]; // arg10
+static float SS_DamageDecayExponent[MAXTF2PLAYERS]; // arg11
+static float SS_BuildingDamageFactor[MAXTF2PLAYERS]; // arg12
+static float SS_Knockback[MAXTF2PLAYERS]; // arg13
+static float SS_PitchConstraint[MAXTF2PLAYERS][2]; // arg14
 // arg14 and arg15 only used at rage time
 static char SS_CooldownError[256]; // arg16
 static char SS_NotEnoughRageError[256]; // arg17
 static char SS_NotMidairError[256]; // arg18
 static char SS_WeighdownError[256]; // arg19
-static int SS_SaxtonEntRef[MAXPLAYERS+1] = {INVALID_ENT_REFERENCE, ...};
+static int SS_SaxtonEntRef[MAXTF2PLAYERS] = {INVALID_ENT_REFERENCE, ...};
 
 /**
  * Saxton Berserker
@@ -258,21 +258,21 @@ static int SS_SaxtonEntRef[MAXPLAYERS+1] = {INVALID_ENT_REFERENCE, ...};
 #define SB_FLAG_IGNITE_SOLDIER 0x0008
 #define SB_FLAG_WEAK_KNOCKBACK_IMMUNE 0x0010
 static bool SB_ActiveThisRound;
-static bool SB_CanUse[MAXPLAYERS+1];
-static float SB_UsingUntil[MAXPLAYERS+1];
-static float SB_FireExpiresAt[MAXPLAYERS+1]; // internal, victim use only
-static bool SB_GiveRageRefund[MAXPLAYERS+1]; // internal, for extreme edge case
-static int SB_FlameEntRefs[MAXPLAYERS+1][2]; // internal
-static bool SB_IsFists[MAXPLAYERS+1]; // internal
-static float SB_LastAttackAvailable[MAXPLAYERS+1]; // internal
-static bool SB_IsAttack2[MAXPLAYERS+1]; // internal
-static TFClassType SB_OriginalClass[MAXPLAYERS+1]; // internal
-static float SB_Duration[MAXPLAYERS+1]; // arg1
+static bool SB_CanUse[MAXTF2PLAYERS];
+static float SB_UsingUntil[MAXTF2PLAYERS];
+static float SB_FireExpiresAt[MAXTF2PLAYERS]; // internal, victim use only
+static bool SB_GiveRageRefund[MAXTF2PLAYERS]; // internal, for extreme edge case
+static int SB_FlameEntRefs[MAXTF2PLAYERS][2]; // internal
+static bool SB_IsFists[MAXTF2PLAYERS]; // internal
+static float SB_LastAttackAvailable[MAXTF2PLAYERS]; // internal
+static bool SB_IsAttack2[MAXTF2PLAYERS]; // internal
+static TFClassType SB_OriginalClass[MAXTF2PLAYERS]; // internal
+static float SB_Duration[MAXTF2PLAYERS]; // arg1
 // arg2-arg10 not stored
-static float SB_Speed[MAXPLAYERS+1]; // arg11
+static float SB_Speed[MAXTF2PLAYERS]; // arg11
 // arg12 not stored
-static TFClassType SB_TempClass[MAXPLAYERS+1]; // arg13
-static int SB_Flags[MAXPLAYERS+1]; // arg19
+static TFClassType SB_TempClass[MAXTF2PLAYERS]; // arg13
+static int SB_Flags[MAXTF2PLAYERS]; // arg19
 
 /**
  * Saxton HUDs
@@ -280,36 +280,36 @@ static int SB_Flags[MAXPLAYERS+1]; // arg19
 #define SH_STRING "saxton_huds" // a unified HUD, to prevent flicker
 #define SH_MAX_HUD_FORMAT_LENGTH 30 // keep it short since it may be individualized in a multi-boss scenario and I don't want to waste too much data space
 static bool SH_ActiveThisRound;
-static bool SH_CanUse[MAXPLAYERS+1];
-static float SH_NextHUDAt[MAXPLAYERS+1]; // internal
-static int SH_LastHPValue[MAXPLAYERS+1]; // internal, for bullshit workaround
+static bool SH_CanUse[MAXTF2PLAYERS];
+static float SH_NextHUDAt[MAXTF2PLAYERS]; // internal
+static int SH_LastHPValue[MAXTF2PLAYERS]; // internal, for bullshit workaround
 static Handle SH_NormalHUDHandle;
 static Handle SH_AlertHUDHandle;
-static float SH_HudY[MAXPLAYERS+1]; // arg1
-static char SH_HudFormat[MAXPLAYERS+1][SH_MAX_HUD_FORMAT_LENGTH]; // arg2
-static bool SH_DisplayHealth[MAXPLAYERS+1]; // arg3
-static bool SH_DisplayRage[MAXPLAYERS+1]; // arg4
+static float SH_HudY[MAXTF2PLAYERS]; // arg1
+static char SH_HudFormat[MAXTF2PLAYERS][SH_MAX_HUD_FORMAT_LENGTH]; // arg2
+static bool SH_DisplayHealth[MAXTF2PLAYERS]; // arg3
+static bool SH_DisplayRage[MAXTF2PLAYERS]; // arg4
 static char SH_LungeReadyStr[256]; // arg5, shared
 static char SH_LungeNotReadyStr[256]; // arg6, shared
 static char SH_SlamReadyStr[256]; // arg7, shared
 static char SH_SlamNotReadyStr[256]; // arg8, shared
 static char SH_BerserkReadyStr[256]; // arg9, shared
 static char SH_BerserkNotReadyStr[256]; // arg10, shared
-static int SH_NormalColor[MAXPLAYERS+1]; // arg11
-static int SH_AlertColor[MAXPLAYERS+1]; // arg12
-static bool SH_AlertIfNotReady[MAXPLAYERS+1]; // arg13
+static int SH_NormalColor[MAXTF2PLAYERS]; // arg11
+static int SH_AlertColor[MAXTF2PLAYERS]; // arg12
+static bool SH_AlertIfNotReady[MAXTF2PLAYERS]; // arg13
 static char SH_HealthStr[256]; // arg14, shared
 static char SH_RageStr[256]; // arg15, shared
-static bool SH_AlertOnLowHP[MAXPLAYERS+1]; // arg16
+static bool SH_AlertOnLowHP[MAXTF2PLAYERS]; // arg16
 
 /**
  * Saxton Advanced Options
  */
 #define SAO_STRING "saxton_advanced_options"
-static bool SAO_CanUse[MAXPLAYERS+1];
-static TFCond SAO_LungeConditions[MAXPLAYERS+1][MAX_CONDITIONS]; // arg1
-static TFCond SAO_SlamConditions[MAXPLAYERS+1][MAX_CONDITIONS]; // arg2
-static TFCond SAO_BerserkConditions[MAXPLAYERS+1][MAX_CONDITIONS]; // arg3
+static bool SAO_CanUse[MAXTF2PLAYERS];
+static TFCond SAO_LungeConditions[MAXTF2PLAYERS][MAX_CONDITIONS]; // arg1
+static TFCond SAO_SlamConditions[MAXTF2PLAYERS][MAX_CONDITIONS]; // arg2
+static TFCond SAO_BerserkConditions[MAXTF2PLAYERS][MAX_CONDITIONS]; // arg3
 // args 12-19 aren't initialized
 
 void Saxton_PluginStart()
@@ -1772,17 +1772,6 @@ static stock void PseudoAmbientSound(int clientIdx, char[] soundPath, int count=
 			EmitSoundToClient(listener, soundPath, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, volume);
 	}
 }
-
-static int abs(int x)
-{
-	return x < 0 ? -x : x;
-}
-
-static float fmin(float n1, float n2)
-{
-	return n1 < n2 ? n1 : n2;
-}
-
 
 static int ReadHexOrDecInt(char[] hexOrDecString)
 {

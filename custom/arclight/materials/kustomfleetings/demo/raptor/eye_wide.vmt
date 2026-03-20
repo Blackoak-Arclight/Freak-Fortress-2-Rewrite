@@ -1,0 +1,12 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "kustomfleetings\demo\raptor\eye_wide"
+	
+	"$envmap" "env_cubemap"
+	//"$envmapmask" "models/raptor/raptor_mapmask"
+	"$envmapsaturation" "0.8"
+	"$envmaptint" "[ 0.3 0.3 0.3 ]"
+
+	"$model" 1
+	"$halflambert" "1"
+}

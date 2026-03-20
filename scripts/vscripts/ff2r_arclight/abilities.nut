@@ -26,7 +26,7 @@ function Abilities_Call(params, strFunc)
 
 function Abilities_OnTakeDamage(params)
 {
-	local tBoss = FF2_GetBossData(params.const_entity)
+	local tBoss = FF2_GetBossConfig(params.const_entity)
 	if(tBoss != null)
 	{
 		foreach(strName, tData in tBoss)
@@ -41,7 +41,7 @@ function Abilities_OnTakeDamage(params)
 
 	if(params.attacker != null)
 	{
-		tBoss = FF2_GetBossData(params.attacker)
+		tBoss = FF2_GetBossConfig(params.attacker)
 		if(tBoss != null)
 		{
 			foreach(strName, tData in tBoss)

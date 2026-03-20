@@ -15,6 +15,7 @@ enum CritType
 #endif
 
 static bool OTDLoaded;
+static bool WasHandScaled[MAXTF2PLAYERS];
 
 void SDKHook_PluginStart()
 {
@@ -68,6 +69,7 @@ void SDKHooks_PutInServer(int client)
 	SDKHook(client, SDKHook_OnTakeDamageAlivePost, OnPlayerTakeDamagePost);
 	SDKHook(client, SDKHook_PreThink, OnPreThink);
 	SDKHook(client, SDKHook_StartTouch, OnStartTouch);
+	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitchPost);
 }
 
 void SDKHooks_EntityCreated(int entity, const char[] classname)
@@ -97,6 +99,25 @@ static Action OnStartTouch(int client, int target)
 {
 	Goomba_StartTouch(client, target);
 	return Plugin_Continue;
+}
+
+static void OnWeaponSwitchPost(int client, int weapon)
+{
+	RequestFrame(WeaponSwitchFrame, GetClientUserId(client));
+}
+
+static void WeaponSwitchFrame(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if(client)
+	{
+		float value = Attrib_FindOnPlayer(client, "hand scale instant", _, true);
+		if(value != 1.0 || WasHandScaled[client])
+		{
+			SetEntProp(client, Prop_Send, "m_flHandScale", value);
+			WasHandScaled[client] = value != 1.0;
+		}
+	}
 }
 
 static Action OnPlayerTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

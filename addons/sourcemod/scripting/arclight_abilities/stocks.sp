@@ -783,9 +783,19 @@ void TF2_ShowAnnotation(int[] clients, int count, int target, const char[] messa
 	event.Cancel();
 }
 
+int abs(int value)
+{
+	return value < 0 ? -value : value;
+}
+
 float fabs(float value)
 {
 	return value < 0.0 ? -value : value;
+}
+
+float fmin(float n1, float n2)
+{
+	return n1 < n2 ? n1 : n2;
 }
 
 int CreateParticleEffect(const char[] effectName = "", const float position[3] = NULL_VECTOR, int attachment = -1, float duration = 0.0, bool voided = true, int controlPoint = -1)
@@ -1134,4 +1144,15 @@ stock int ParticleEffectAt(float position[3], const char[] effectName, float dur
 			CreateTimer(duration, Timer_RemoveEntity, EntIndexToEntRef(particle), TIMER_FLAG_NO_MAPCHANGE);
 	}
 	return particle;
+}
+
+bool IsInvuln(int client)
+{
+	return (TF2_IsPlayerInCondition(client, TFCond_Ubercharged) ||
+		TF2_IsPlayerInCondition(client, TFCond_UberchargedCanteen) ||
+		TF2_IsPlayerInCondition(client, TFCond_UberchargedHidden) ||
+		TF2_IsPlayerInCondition(client, TFCond_UberchargedOnTakeDamage) ||
+		TF2_IsPlayerInCondition(client, TFCond_Bonked) ||
+		TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode) ||
+		!GetEntProp(client, Prop_Data, "m_takedamage"));
 }

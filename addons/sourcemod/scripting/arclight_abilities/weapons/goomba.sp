@@ -8,7 +8,7 @@
 #define GOOMBA_SOUND	"goomba/rebound.wav"
 
 static GlobalForward OnGoombaStomp;
-static float GoombaCooldown[MAXPLAYERS+1];
+static float GoombaCooldown[MAXTF2PLAYERS];
 
 void Goomba_PluginLoad()
 {

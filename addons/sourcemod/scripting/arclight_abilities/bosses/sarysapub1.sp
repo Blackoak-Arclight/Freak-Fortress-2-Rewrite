@@ -29,7 +29,7 @@
 static bool PluginActiveThisRound = false;
 
 // ROTT shared HUD
-static float ROTT_HudRefreshAt[MAXPLAYERS+1];
+static float ROTT_HudRefreshAt[MAXTF2PLAYERS];
 static Handle ROTT_SyncHud;
 
 // ROTT props and sub-rages
@@ -43,13 +43,13 @@ static Handle ROTT_SyncHud;
 #define PROP_COUNT 4
 static bool RP_ActiveThisRound = false;
 static bool RP_NoFallDamage = false; // arg18
-static bool RP_CanUse[MAXPLAYERS+1]; // internal
-static int RP_CurrentlySelectedProp[MAXPLAYERS+1]; // internal
-static bool RP_SpecialKeyDown[MAXPLAYERS+1]; // internal
-static bool RP_AltFireKeyDown[MAXPLAYERS+1]; // internal
-static bool RP_ReloadKeyDown[MAXPLAYERS+1]; // internal
-static bool RP_CanDeployProp[MAXPLAYERS+1][PROP_COUNT]; // arg1,3,5,6
-static float RP_PropRageCost[MAXPLAYERS+1][PROP_COUNT]; // arg2,4,6,8
+static bool RP_CanUse[MAXTF2PLAYERS]; // internal
+static int RP_CurrentlySelectedProp[MAXTF2PLAYERS]; // internal
+static bool RP_SpecialKeyDown[MAXTF2PLAYERS]; // internal
+static bool RP_AltFireKeyDown[MAXTF2PLAYERS]; // internal
+static bool RP_ReloadKeyDown[MAXTF2PLAYERS]; // internal
+static bool RP_CanDeployProp[MAXTF2PLAYERS][PROP_COUNT]; // arg1,3,5,6
+static float RP_PropRageCost[MAXTF2PLAYERS][PROP_COUNT]; // arg2,4,6,8
 static char RP_PropName[PROP_COUNT][MAX_PROP_NAME_LENGTH]; // derived from various sub-rage args
 static char RP_StrNotEnoughRage[170]; // arg15
 static char RP_StrGroundOnly[170]; // arg16
@@ -89,8 +89,8 @@ static char RPP_PlatformModel[PLATFORM_MAX_PATH]; // arg2
 #define RP_ERROR_STATE_GROUND_ONLY 2
 #define RP_ERROR_STATE_PLAYER_BLOCKING 3
 #define RP_ERROR_STATE_UNKNOWN 4
-static int RP_ActiveErrorState[MAXPLAYERS+1];
-static float RP_DisplayErrorUntil[MAXPLAYERS+1];
+static int RP_ActiveErrorState[MAXTF2PLAYERS];
+static float RP_DisplayErrorUntil[MAXTF2PLAYERS];
 
 // ROTT weapons
 #define RW_STRING "rage_rott_weapons"
@@ -106,18 +106,18 @@ static float RP_DisplayErrorUntil[MAXPLAYERS+1];
 #define RW_TYPE_GOD_MODE 5
 static int RW_ActiveThisRound;
 static char RW_Messages[RW_MAX_WEAPONS+3][RW_MAX_MESSAGE_LENGTH];
-static bool RW_CanUse[MAXPLAYERS+1]; // internal
-static int RW_ActiveMessageIndex[MAXPLAYERS+1]; // internal
-static float RW_MessageActiveUntil[MAXPLAYERS+1]; // internal
-static int RW_ActiveWeaponSpec[MAXPLAYERS+1]; // internal
-static bool RW_ArmorActive[MAXPLAYERS+1]; // internal
-static float RW_ArmorActiveUntil[MAXPLAYERS+1]; // internal
-static bool RW_GodModeActive[MAXPLAYERS+1]; // internal
-static float RW_GodModeActiveUntil[MAXPLAYERS+1]; // internal
-static float RW_NextGodModeSoundAt[MAXPLAYERS+1]; // internal
-static int RW_WeaponCount[MAXPLAYERS+1]; // arg1
+static bool RW_CanUse[MAXTF2PLAYERS]; // internal
+static int RW_ActiveMessageIndex[MAXTF2PLAYERS]; // internal
+static float RW_MessageActiveUntil[MAXTF2PLAYERS]; // internal
+static int RW_ActiveWeaponSpec[MAXTF2PLAYERS]; // internal
+static bool RW_ArmorActive[MAXTF2PLAYERS]; // internal
+static float RW_ArmorActiveUntil[MAXTF2PLAYERS]; // internal
+static bool RW_GodModeActive[MAXTF2PLAYERS]; // internal
+static float RW_GodModeActiveUntil[MAXTF2PLAYERS]; // internal
+static float RW_NextGodModeSoundAt[MAXTF2PLAYERS]; // internal
+static int RW_WeaponCount[MAXTF2PLAYERS]; // arg1
 static float RW_HomingInterval; // arg3
-static int RW_WeaponChances[MAXPLAYERS+1][RW_MAX_WEAPONS]; // arg4
+static int RW_WeaponChances[MAXTF2PLAYERS][RW_MAX_WEAPONS]; // arg4
 // arg5 and arg6 not stored this way
 // arg19 is an error message not stored here
 
@@ -170,7 +170,7 @@ static int RocketBeingCreated = false; // prevent endless recursion with the roc
 static int PROP_HighestSpawnedProp = -1;
 static int PROP_EntRef[MAX_PROPS];
 static int PROP_Type[MAX_PROPS];
-static float PROP_NextTriggerTime[MAX_PROPS][MAXPLAYERS+1]; // yes, this has a large data size. but it's for the best.
+static float PROP_NextTriggerTime[MAX_PROPS][MAXTF2PLAYERS]; // yes, this has a large data size. but it's for the best.
 static int PROP_OwnerUserId[MAX_PROPS];
 
 void Sarysapub1_PluginStart()
@@ -432,7 +432,7 @@ void Sarysapub1_PluginEnd()
  */
 #define PROPS_MESSAGE_MAX 200
 #define HUD_MESSAGE_MAX (RW_MAX_MESSAGE_LENGTH + 2 + PROPS_MESSAGE_MAX + 1 + PROPS_MESSAGE_MAX + 1 + PROPS_MESSAGE_MAX + 1)
-static char ROTT_HudMessage[MAXPLAYERS+1][HUD_MESSAGE_MAX];
+static char ROTT_HudMessage[MAXTF2PLAYERS][HUD_MESSAGE_MAX];
 static void ROTT_UpdateHUD(int clientIdx)
 {
 	static char weaponMessage[RW_MAX_MESSAGE_LENGTH];
@@ -1226,9 +1226,9 @@ void Sarysapub1_GameFrame()
 	if (RP_ActiveThisRound)
 	{
 		// this is a very taxing method. try to alleviate it somewhat by getting all player living states and origins early
-		static float clientBounds[MAXPLAYERS+1][3];
-		static bool clientValid[MAXPLAYERS+1];
-		static bool onGround[MAXPLAYERS+1];
+		static float clientBounds[MAXTF2PLAYERS][3];
+		static bool clientValid[MAXTF2PLAYERS];
+		static bool onGround[MAXTF2PLAYERS];
 		for (int clientIdx = 1; clientIdx <= MaxClients; clientIdx++)
 		{
 			clientValid[clientIdx] = IsLivingPlayer(clientIdx);
@@ -1699,7 +1699,7 @@ static void PlaySoundLocal(int clientIdx, char[] soundPath, bool followPlayer = 
 
 static bool IsLivingPlayer(int clientIdx)
 {
-	if (clientIdx <= 0 || clientIdx >= MAXPLAYERS+1)
+	if (clientIdx <= 0 || clientIdx >= MAXTF2PLAYERS)
 		return false;
 		
 	return IsClientInGame(clientIdx) && IsPlayerAlive(clientIdx);
@@ -1767,11 +1767,6 @@ static float fixAngle(float angle)
 }
 
 static int min(int n1, int n2)
-{
-	return n1 < n2 ? n1 : n2;
-}
-
-static float fmin(float n1, float n2)
 {
 	return n1 < n2 ? n1 : n2;
 }

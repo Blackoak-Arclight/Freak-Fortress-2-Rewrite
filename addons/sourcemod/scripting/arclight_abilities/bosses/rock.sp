@@ -64,8 +64,8 @@ void Rock_Ability(int client, const char[] ability, AbilityData cfg)
 	else if(!StrContains(ability, "rage_rock_exploding", false))
 	{
 		DataPack pack;
-		CreateDataTimer(0.1, RockExplodeTimer, pack, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT);
-		pack.WriteCell(GetClientUserId(client));
+		BossTimers[client].Push(CreateDataTimer(0.1, RockExplodeTimer, pack, TIMER_FLAG_NO_MAPCHANGE|TIMER_REPEAT));
+		pack.WriteCell(client);
 		pack.WriteFloat(cfg.GetFloat("duration", 5.0) + GetGameTime());
 		pack.WriteFloat(cfg.GetFloat("damage", 9999.0) / 10.0);
 		pack.WriteFloat(cfg.GetFloat("radius", 100.0));
@@ -107,33 +107,31 @@ Action Rock_PlayerDeath(Event event)
 static Action RockExplodeTimer(Handle timer, DataPack pack)
 {
 	pack.Reset();
-	int client = GetClientOfUserId(pack.ReadCell());
-	if(client && FF2R_GetBossData(client))
+	int client = pack.ReadCell();
+	if(GetGameTime() < pack.ReadFloat())
 	{
-		if(GetGameTime() < pack.ReadFloat())
+		int entity = CreateEntityByName("env_explosion");
+		if(entity != -1)
 		{
-			int entity = CreateEntityByName("env_explosion");
-			if(entity != -1)
-			{
-				float pos[3];
-				GetClientAbsOrigin(client, pos);
+			float pos[3];
+			GetClientAbsOrigin(client, pos);
 
-				DispatchKeyValueFloat(entity, "iMagnitude", pack.ReadFloat());
-				DispatchKeyValueFloat(entity, "iRadiusOverride", pack.ReadFloat());
-				DispatchKeyValueVector(entity, "origin", pos);
-				DispatchKeyValue(entity, "spawnflags", "1916"); // No effects
+			DispatchKeyValueFloat(entity, "iMagnitude", pack.ReadFloat());
+			DispatchKeyValueFloat(entity, "iRadiusOverride", pack.ReadFloat());
+			DispatchKeyValueVector(entity, "origin", pos);
+			DispatchKeyValue(entity, "spawnflags", "1916"); // No effects
 
-				SetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity", client);
-				
-				DispatchSpawn(entity);
+			SetEntPropEnt(entity, Prop_Data, "m_hOwnerEntity", client);
+			
+			DispatchSpawn(entity);
 
-				AcceptEntityInput(entity, "Explode");
-				AcceptEntityInput(entity, "Kill");
+			AcceptEntityInput(entity, "Explode");
+			AcceptEntityInput(entity, "Kill");
 
-				return Plugin_Continue;
-			}
+			return Plugin_Continue;
 		}
 	}
 	
+	BossTimers[client].Erase(BossTimers[client].FindValue(timer));
 	return Plugin_Stop;
 }

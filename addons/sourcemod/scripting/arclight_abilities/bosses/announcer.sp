@@ -5,8 +5,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static Handle ConvertTimer[MAXPLAYERS+1];
-static DataPack ConvertPack[MAXPLAYERS+1];
+static Handle ConvertTimer[MAXTF2PLAYERS];
+static DataPack ConvertPack[MAXTF2PLAYERS];
 
 void Announcer_PlayerSpawn(int client)
 {

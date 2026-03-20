@@ -29,7 +29,7 @@ g_AbilityList["think_cheese_manic"] <-
 {
 	"OnCreated" : function(hClient, tBoss, tAbility)
 	{
-		local m = player.GetScriptScope()
+		local m = hClient.GetScriptScope()
 		m.think_cheese_manic <- tAbility
 		m.think_cheese_manic._holding <- false
 		m.think_cheese_manic._checkin <- 0.0
@@ -47,7 +47,7 @@ g_AbilityList["think_cheese_manic"] <-
 		hClient.RemoveCustomAttribute("disable weapon switching")
 		SetPropString(hClient, "m_iszScriptThinkFunction", "")
 
-		local m = player.GetScriptScope()
+		local m = hClient.GetScriptScope()
 		if("think_cheese_manic" in m)
 			delete m.think_cheese_manic
 	}
@@ -56,7 +56,7 @@ g_AbilityList["think_cheese_manic"] <-
 		if(params.inflictor != null && params.inflictor.GetClassname() == "obj_sentrygun")
 		{
 			local hActive = GetPropEntity(params.const_entity, "m_hActiveWeapon")
-			if(GetPropInt(hActive, "m_Item.m_iItemDefinitionIndex") == GetArgInt(tAbility, "manic_index"))
+			if(GetPropInt(hActive, "m_AttributeManager.m_Item.m_iItemDefinitionIndex") == GetArgInt(tAbility, "manic_index"))
 				params.damage_type = params.damage_type | DMG_PREVENT_PHYSICS_FORCE
 		}
 	}
@@ -79,15 +79,15 @@ function DotManicThink()
 	local iButtons = GetPropInt(self, "m_nButtons")
 	if(m.think_cheese_manic._holding)
 	{
-		if(!(iButtons & GetArgInt(m.think_cheese_manic, "button", 13)))
+		if(!(iButtons & (1 << GetArgInt(m.think_cheese_manic, "button", 13))))
 			m.think_cheese_manic._holding = false
 	}
-	else if(iButtons & GetArgInt(m.think_cheese_manic, "button", 13))
+	else if(iButtons & (1 << GetArgInt(m.think_cheese_manic, "button", 13)))
 	{
 		m.think_cheese_manic._holding = true
 
 		local hActive = GetPropEntity(self, "m_hActiveWeapon")
-		if(hActive != null && GetPropInt(hActive, "m_Item.m_iItemDefinitionIndex") == GetArgInt(m.think_cheese_manic, "manic_index"))
+		if(hActive != null && GetPropInt(hActive, "m_AttributeManager.m_Item.m_iItemDefinitionIndex") == GetArgInt(m.think_cheese_manic, "manic_index"))
 		{
 			DotManicSwitch(self, m.think_cheese_manic, "normal", true)
 		}
@@ -111,7 +111,7 @@ function DotManicThink()
 		local hActive = GetPropEntity(self, "m_hActiveWeapon")
 		local flRage = GetBossCharge(self, 0)
 
-		if(hActive != null && GetPropInt(hActive, "m_Item.m_iItemDefinitionIndex") == GetArgInt(m.think_cheese_manic, "manic_index"))
+		if(hActive != null && GetPropInt(hActive, "m_AttributeManager.m_Item.m_iItemDefinitionIndex") == GetArgInt(m.think_cheese_manic, "manic_index"))
 		{
 			local flCost = GetArgFloat(m.think_cheese_manic, "cost") / 10.0
 			if(flRage < flCost)
@@ -163,7 +163,7 @@ function DotManicSwitch(hClient, tAbility, strMode, bEffects)
 	for(local i = 0; i < iLength; i++)
 	{
 		local hWeapon = GetPropEntityArray(hClient, "m_hMyWeapons", i)
-		if(GetPropInt(hWeapon, "m_Item.m_iItemDefinitionIndex") == iIndex)
+		if(GetPropInt(hWeapon, "m_AttributeManager.m_Item.m_iItemDefinitionIndex") == iIndex)
 		{
 			hClient.Weapon_Switch(hWeapon)
 			SetPropEntity(hClient, "m_hActiveWeapon", hWeapon)
@@ -171,7 +171,7 @@ function DotManicSwitch(hClient, tAbility, strMode, bEffects)
 		}
 	}
 
-	hClient.AddCustomAttribute("disable weapon switching")
+	hClient.AddCustomAttribute("disable weapon switching", 1.0, -1.0)
 
 	if(bEffects)
 	{

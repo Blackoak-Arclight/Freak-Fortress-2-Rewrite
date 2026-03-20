@@ -1,7 +1,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static int WallClimbCombo[MAXPLAYERS+1];
+static int WallClimbCombo[MAXTF2PLAYERS];
 
 void CustomAttrib_AllPluginsLoaded()
 {
@@ -92,9 +92,15 @@ void CustomAttrib_AllPluginsLoaded()
 	attrib.Register();
 
 	attrib.SetName("mod airblast any stale");
-	attrib.SetClass("ff2.stale_any_airblast_refire");
+	attrib.SetClass("arclight.stale_any_airblast_refire");
 	attrib.SetDescriptionFormat("additive");
 	attrib.SetCustom("description_ff2_string", "Successive airblasts increases airblast cooldown");
+	attrib.Register();
+
+	attrib.SetName("hand scale instant");
+	attrib.SetClass("arclight.hand_scale");
+	attrib.SetDescriptionFormat("percentage");
+	attrib.SetCustom("description_ff2_string", "");
 	attrib.Register();
 
 	attrib.SetClass("arclight.displayonly");

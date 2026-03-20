@@ -85,11 +85,11 @@ function CheeseNuke(hClient, tAbility)
 			if(strParticle != null)
 			{
 				local hParticle = SpawnEntityFromTable("info_particle_system", {
-					origin = vecOther
+					origin = vecOther + Vector(0.0, 0.0, 75.0)
 					effect_name = strParticle
 				})
 
-				hParticle.AcceptInput("SetParent", "!activator", hClient, null)
+				hParticle.AcceptInput("SetParent", "!activator", hEntity, null)
 				hParticle.AcceptInput("Start", "", null, null)
 				EntFireByHandle(hParticle, "Kill", "", flDuration, null, null)
 			}

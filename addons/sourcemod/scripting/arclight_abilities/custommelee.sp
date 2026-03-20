@@ -14,7 +14,7 @@ enum struct MeleeData
 }
 
 static IntMap MeleeSavedData;
-static bool GlobalNextSound[MAXPLAYERS+1];
+static bool GlobalNextSound[MAXTF2PLAYERS];
 
 void CustomMelee_MapStart()
 {

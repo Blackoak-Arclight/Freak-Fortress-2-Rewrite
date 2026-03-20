@@ -1,5 +1,4 @@
 #include <sourcemod>
-#tryinclude <virtual_address>
 #include <sdkhooks>
 #include <tf2_stocks>
 //#include <dhooks>
@@ -30,6 +29,8 @@ bool SpecTeam;
 char KillIcon[64];
 char KillName[64];
 
+ArrayList BossTimers[MAXTF2PLAYERS];
+
 ConVar CvarFriendlyFire;
 
 #include "freak_fortress_2/econdata.sp"
@@ -49,11 +50,15 @@ ConVar CvarFriendlyFire;
 
 #include "arclight_abilities/weapons/goomba.sp"
 
-#include "arclight_abilities/bosses/captain_kinky.sp"
 #include "arclight_abilities/bosses/announcer.sp"
+#include "arclight_abilities/bosses/captain_kinky.sp"
+#include "arclight_abilities/bosses/heffe.sp"
 #include "arclight_abilities/bosses/hhh.sp"
 #include "arclight_abilities/bosses/improved_saxton.sp"
+#include "arclight_abilities/bosses/phatrages.sp"
+#include "arclight_abilities/bosses/pyromancer.sp"
 #include "arclight_abilities/bosses/rock.sp"
+#include "arclight_abilities/bosses/sarysamods9.sp"
 #include "arclight_abilities/bosses/sarysapub1.sp"
 #include "arclight_abilities/bosses/spellbook.sp"
 #include "arclight_abilities/bosses/vagineer.sp"
@@ -86,7 +91,7 @@ public void OnPluginStart()
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
 	HookEvent("player_spawn", OnPlayerSpawn);
 	HookEvent("deploy_buff_banner", OnDeployBanner);
-	HookEvent("deploy_buff_banner", OnObjectDeflected);
+	HookEvent("object_deflected", OnObjectDeflected);
 	
 	// FF2 Files
 	Attrib_PluginStart();
@@ -149,6 +154,8 @@ public void OnMapStart()
 {
 	//CustomMelee_MapStart();
 	Goomba_MapStart();
+	Heffe_MapStart();
+	PhatRages_MapStart();
 	Saxton_MapStart();
 }
 
@@ -187,6 +194,7 @@ public void OnClientDisconnect(int client)
 
 public void OnGameFrame()
 {
+	Sarysamods9_GameFrame();
 	Sarysapub1_GameFrame();
 	Saxton_GameFrame();
 }
@@ -218,26 +226,44 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void FF2R_OnBossCreated(int client, BossData cfg, bool setup)
 {
+	if(!BossTimers[client])
+		BossTimers[client] = new ArrayList();
+	
+	Pyromancer_BossCreated(client, cfg);
+	Sarysamods9_BossCreated(client, cfg, setup);
 	Sarysapub1_BossCreated(client, cfg, setup);
 	Saxton_BossCreated(client, cfg, setup);
 }
 
 public void FF2R_OnBossEquipped(int client, bool weapons)
 {
+	Pyromancer_BossEquipped(client, weapons);
 	Saxton_BossEquipped(client, weapons);
 }
 
 public void FF2R_OnBossRemoved(int client)
 {
+	Pyromancer_BossRemoved(client);
+	Sarysamods9_BossRemoved(client);
 	Sarysapub1_BossRemoved(client);
 	Saxton_BossRemoved(client);
+
+	int length = BossTimers[client].Length;
+	for(int i; i < length; i++)
+	{
+		CloseHandle(BossTimers[client].Get(i));
+	}
+	delete BossTimers[client];
 }
 
 public void FF2R_OnAbility(int client, const char[] ability, AbilityData cfg)
 {
+	Heffe_Ability(client, ability, cfg);
 	HHH_Ability(client, ability, cfg);
 	Rock_Ability(client, ability, cfg);
 	CK_Ability(client, ability, cfg);
+	PhatRages_Ability(client, ability, cfg);
+	Sarysamods9_Ability(client, ability);
 	Sarysapub1_Ability(client, ability, cfg);
 	Saxton_Ability(client, ability);
 	Spellbook_Ability(client, ability, cfg);

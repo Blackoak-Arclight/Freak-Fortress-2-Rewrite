@@ -11,8 +11,8 @@ function Attributes_Call(hClient, hWeapon, strFunc)
 		{
 			if(strName in g_AttributeList)
 			{
-				if(strFunc in g_AttributeList[params.name])
-					g_AttributeList[params.name][strFunc](hClient, hWeapon, value)
+				if(strFunc in g_AttributeList[strName])
+					g_AttributeList[strName][strFunc](hClient, hWeapon, value)
 			}
 		}
 	}
@@ -27,6 +27,17 @@ function Attributes_CallByPlayer(hClient, strFunc)
 		local hWeapon = GetPropEntityArray(hClient, "m_hMyWeapons", i)
 		if(hWeapon != null)
 			Attributes_Call(hClient, hWeapon, strFunc)
+	}
+}
+
+function Attributes_CallDelayed()
+{
+	local iLength = GetPropArraySize(self, "m_hMyWeapons")
+	for(local i = 0; i < iLength; i++)
+	{
+		local hEntity = GetPropEntityArray(self, "m_hMyWeapons", i)
+		if(hEntity != null)
+			Attributes_Call(self, hEntity, "OnPostInventory")
 	}
 }
 

@@ -54,13 +54,59 @@ function GetArgTable(tTable, strKey, defaul = null)
 	return ((strKey in tTable) && typeof(tTable[strKey]) == "table") ? tTable[strKey] : defaul
 }
 
+local _PostInputScope = null
+local _PostInputFunc  = null
+
+// Sets functions that execute before and/or after a given input is received on the entity
+// Both pre_func and post_func are optional
+function SetInputHook(entity, input, pre_func, post_func)
+{
+	entity.ValidateScriptScope()
+	local scope = entity.GetScriptScope()
+	if (post_func)
+	{
+		local wrapper_func = function()
+		{
+			_PostInputScope = scope
+			_PostInputFunc  = post_func
+			if (pre_func)
+				return pre_func.call(scope)
+			return true
+		}
+
+		scope["Input" + input]           <- wrapper_func
+		scope["Input" + input.tolower()] <- wrapper_func
+	}
+	else if (pre_func)
+	{
+		scope["Input" + input]           <- pre_func
+		scope["Input" + input.tolower()] <- pre_func
+	}
+}
+
+// Internal wrapper for SetInputHook
+ROOT.setdelegate(
+{
+	_delslot = function(k)
+	{
+		if (_PostInputScope && k == "activator" && "activator" in this)
+		{
+			_PostInputFunc.call(_PostInputScope)
+			_PostInputFunc = null
+		}
+
+		rawdelete(k)
+	}
+})
+
 // Creates a timer that executes the given function after a delay
 // The function may return a float value to repeat the function again after the new delay
 // If the function returns nothing or null, the timer is killed
 // Returns a handle to the timer, like an entity
 function CreateTimer(on_timer_func, delay)
 {
-	local relay = CreateEntitySafe("logic_relay")
+	local relay = Entities.CreateByClassname("logic_relay")
+	SetPropBool(relay, "m_bForcePurgeFixedupStrings", true)
 	relay.ValidateScriptScope()
 	local relay_scope = relay.GetScriptScope()
 	relay_scope.scope <- this
@@ -117,7 +163,11 @@ function PlayerAlive(hPlayer)
 // Charge, eg. slot 0 is RAGE
 function GetBossCharge(hPlayer, slot)
 {
-	return FF2_PullBossKey(hPlayer, "charge" + slot)
+	local rage = FF2_PullBossKey(hPlayer, "charge" + slot)
+	if(rage != null && typeof(rage) == "string")
+		return rage.tofloat()
+
+	return 0.0
 }
 
 // Charge, eg. slot 0 is RAGE
