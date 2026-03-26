@@ -143,35 +143,7 @@ static Action AnnouncerSwapTimer(Handle timer, int client)
 					SDKCall_AddObject(client, entity);
 			}
 			
-			int i;
-			while(TF2_GetItem(client, entity, i))
-			{
-				SetEntProp(entity, Prop_Send, "m_iTeamNum", team);
-			}
-
-			i = 0;
-			while(TF2U_GetWearable(client, entity, i))
-			{
-				SetEntProp(entity, Prop_Send, "m_iTeamNum", team);
-			}
-			
-			//Refill health
-			SetEntityHealth(client, SDKCall_GetMaxHealth(client));
-			
-			//Refill ammo (jank)
-			entity = CreateEntityByName("item_ammopack_full");
-			SetVariantString("OnPlayerTouch !self:Kill::0:1");
-			AcceptEntityInput(entity, "AddOutput");
-			SetVariantString("OnUser4 !self:Kill::0.1:1");
-			AcceptEntityInput(entity, "AddOutput");
-			AcceptEntityInput(entity, "FireUser4");
-			
-			DispatchSpawn(entity);
-			SetEntityRenderMode(entity, RENDER_NONE);
-			
-			float pos[3];
-			GetClientAbsOrigin(client, pos);
-			TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
+			TF2_RegeneratePlayer(client);
 			
 			//Give crit resistance 
 			TF2_AddCondition(client, TFCond_DefenseBuffed);
