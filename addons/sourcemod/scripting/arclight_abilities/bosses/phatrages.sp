@@ -73,15 +73,23 @@ static void Delirium(int client, AbilityData cfg)
 			GetEntPropVector(i, Prop_Send, "m_vecOrigin", pos2);
 			if(GetVectorDistance(pos1, pos2, true) < distance)
 			{
-				SetVariantInt(0);
-				AcceptEntityInput(i, "SetForcedTauntCam");
-
 				delete DrugTimer[i];
 
+				float angs[3];
+				GetClientEyeAngles(i, angs);
+
 				DataPack pack;
-				DrugTimer[i] = CreateDataTimer(0.1, fxDrug_Timer, pack, TIMER_REPEAT);
+				DrugTimer[i] = CreateDataTimer(duration / 6.1, fxDrug_Timer, pack, TIMER_REPEAT);
 				pack.WriteCell(i);
 				pack.WriteFloat(duration);
+
+				pack = new DataPack();
+				pack.WriteCell(GetClientUserId(i));
+				pack.WriteFloat(duration);
+				pack.WriteFloat(angs[0]);
+				pack.WriteFloat(angs[1]);
+				pack.WriteFloat(angs[2]);
+				RequestFrame(AngleSetFrame, pack);
 			}
 		}	
 	}
@@ -110,41 +118,17 @@ static Action fxDrug_Timer(Handle timer, DataPack pack)
 	{
 		if(IsPlayerAlive(client) && pack.ReadFloat() > GetGameTime())
 		{
-			static int Repeat;
-			
-			SetVariantInt(0);
-			AcceptEntityInput(client, "SetForcedTauntCam");
-			
-			float angs[3];
-			GetClientEyeAngles(client, angs);
-
-			static const float g_DrugAngles[] = {0.0, 3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0, 27.0, 30.0, 33.0, 36.0, 39.0, 42.0, 39.0, 36.0, 33.0, 30.0, 27.0, 24.0, 21.0, 18.0, 15.0, 12.0, 9.0, 6.0, 3.0, 0.0, -3.0, -6.0, -9.0, -12.0, -15.0, -18.0, -21.0, -24.0, -27.0, -30.0, -33.0, -36.0, -39.0, -42.0, -39.0, -36.0, -33.0, -30.0, -27.0, -24.0, -21.0, -18.0, -15.0, -12.0, -9.0, -6.0, -3.0 };
-			angs[2] = g_DrugAngles[Repeat % sizeof(g_DrugAngles)];
-			angs[1] = g_DrugAngles[(Repeat+14) % sizeof(g_DrugAngles)];
-			angs[0] = g_DrugAngles[(Repeat+21) % sizeof(g_DrugAngles)];
-
-			TeleportEntity(client, NULL_VECTOR, angs, NULL_VECTOR);
-			
 			SetEntProp(client, Prop_Send, "m_iFOV", 160);
 			SetEntProp(client, Prop_Send, "m_iDefaultFOV", 160);
-			
-			if((Repeat%15) == 0)
-				ClientCommand(client, "playgamesound ambient/halloween/mysterious_perc_01.wav");
+
+			ClientCommand(client, "playgamesound ambient/halloween/mysterious_perc_01.wav");
 			
 			SetVariantString("effects/tp_eyefx/tpeye.vmt");
-			AcceptEntityInput(client, "SetScriptOverlayMaterial"); // rainbow flashes
+			AcceptEntityInput(client, "SetScriptOverlayMaterial");
 			
-			Repeat++;
-			
-			ScreenFade(client, 255, 255, 0x0002, GetRandomInt(0,255), GetRandomInt(0,255), GetRandomInt(0,255), 150);
 			return Plugin_Continue;
 		}
 
-		float angs[3];
-		GetClientEyeAngles(client, angs);
-		angs[2] = 0.0;
-		TeleportEntity(client, NULL_VECTOR, angs, NULL_VECTOR);	
-		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetScriptOverlayMaterial");
 		
@@ -154,6 +138,35 @@ static Action fxDrug_Timer(Handle timer, DataPack pack)
 
 	DrugTimer[client] = null;
 	return Plugin_Stop;
+}
+
+static void AngleSetFrame(DataPack pack)
+{
+	pack.Reset();
+	int client = GetClientOfUserId(pack.ReadCell());
+	if(client)
+	{
+		if(IsPlayerAlive(client) && pack.ReadFloat() > GetGameTime())
+		{
+			float angs[3];
+			for(int i; i < 3; i++)
+			{
+				angs[i] = pack.ReadFloat();
+			}
+
+			TeleportEntity(client, _, angs);
+
+			RequestFrame(AngleSetFrame, pack);
+			return;
+		}
+
+		float angs[3];
+		GetClientEyeAngles(client, angs);
+		angs[2] = 0.0;
+		TeleportEntity(client, _, angs);	
+	}
+
+	delete pack;
 }
 
 static void Hellfire(int client, AbilityData cfg)
