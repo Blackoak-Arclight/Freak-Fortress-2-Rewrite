@@ -119,7 +119,6 @@ static Action fxDrug_Timer(Handle timer, DataPack pack)
 		if(IsPlayerAlive(client) && pack.ReadFloat() > GetGameTime())
 		{
 			SetEntProp(client, Prop_Send, "m_iFOV", 160);
-			SetEntProp(client, Prop_Send, "m_iDefaultFOV", 160);
 
 			ClientCommand(client, "playgamesound ambient/halloween/mysterious_perc_01.wav");
 			
@@ -132,8 +131,8 @@ static Action fxDrug_Timer(Handle timer, DataPack pack)
 		SetVariantString("");
 		AcceptEntityInput(client, "SetScriptOverlayMaterial");
 		
-		SetEntProp(client, Prop_Send, "m_iFOV", 90);
-		SetEntProp(client, Prop_Send, "m_iDefaultFOV", 90);
+		SetEntData(client, FindSendPropInfo("CTFPlayer", "m_iSpawnCounter") - 8, 0, _, true);	// m_iPreTauntFov
+		SetEntProp(client, Prop_Send, "m_iFOV", 0);
 	}
 
 	DrugTimer[client] = null;
