@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\player\pony\cheese\tail"
+	$translucent 0
+}
+
+

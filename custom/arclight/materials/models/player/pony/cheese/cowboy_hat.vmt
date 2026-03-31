@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\player\pony\cheese\cowboy_hat"
+	$translucent 0
+}

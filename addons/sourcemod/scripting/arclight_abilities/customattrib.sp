@@ -91,6 +91,12 @@ void CustomAttrib_AllPluginsLoaded()
 	attrib.SetCustom("description_ff2_string", "Damage is affected by range");
 	attrib.Register();
 
+	attrib.SetName("mod scattergun hit stale");
+	attrib.SetClass("arclight.stale_boss_hit_scattergun");
+	attrib.SetDescriptionFormat("additive");
+	attrib.SetCustom("description_ff2_string", "Successive hits on a boss decreases knockback power");
+	attrib.Register();
+
 	attrib.SetName("mod airblast any stale");
 	attrib.SetClass("arclight.stale_any_airblast_refire");
 	attrib.SetDescriptionFormat("additive");
@@ -170,6 +176,19 @@ stock Action CustomAttrib_PlayerTakeDamage(int victim, int &attacker, int &infli
 			pack.WriteCell(GetClientUserId(attacker));
 			pack.WriteFloat(value);
 			RequestFrame(IgniteFrame, pack);
+		}
+
+		if(FF2R_GetBossData(victim))
+		{
+			if(Attrib_Get(weapon, "mod scattergun hit stale", _, value))
+			{
+				value += 1.0;
+				SetEntProp(weapon, Prop_Send, "m_iAccountID", 0);
+				
+				float initial = 1.0;
+				Attrib_Get(weapon, "scattergun knockback mult", 5, initial);
+				Attrib_Set(weapon, "scattergun knockback mult", 5, initial / value);
+			}
 		}
 	}
 

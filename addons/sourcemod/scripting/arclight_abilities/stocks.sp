@@ -1156,3 +1156,29 @@ bool IsInvuln(int client)
 		TF2_IsPlayerInCondition(client, TFCond_HalloweenGhostMode) ||
 		!GetEntProp(client, Prop_Data, "m_takedamage"));
 }
+
+float GetFormula(ConfigData cfg, const char[] key, int players, float defaul = 0.0)
+{
+	static char buffer[1024];
+	if(!cfg.GetString(key, buffer, sizeof(buffer)))
+		return defaul;
+	
+	return ParseFormula(buffer, players);
+}
+
+void CreateAttachedAnnotation(int client, int entity, bool effect, float time, const char[] buffer, any ...)
+{
+	static char message[512];
+	SetGlobalTransTarget(client);
+	VFormat(message, sizeof(message), buffer, 6);
+
+	Event event = CreateEvent("show_annotation", true);
+	event.SetInt("follow_entindex", entity);
+	event.GetFloat("lifetime", time);
+	event.SetInt("visibilityBitfield", (1 << client));
+	event.SetBool("show_effect", effect);
+	event.SetString("text", message);
+	event.SetString("play_sound", "vo/null.mp3");
+	event.SetInt("id", entity);
+	event.Fire();
+}

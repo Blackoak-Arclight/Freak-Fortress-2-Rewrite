@@ -203,6 +203,9 @@ static void Rage_LoveCurse(int clientIdx)
 								LC_ParticleEntRef[firstVictim] = EntIndexToEntRef(effect);
 						}
 						
+						CreateAttachedAnnotation(victim, firstVictim, true, LC_Duration[clientIdx], LC_AfflictionMessage, firstVictim);
+						CreateAttachedAnnotation(firstVictim, victim, true, LC_Duration[clientIdx], LC_AfflictionMessage, victim);
+						
 						isSecond = false;
 					}
 					else
@@ -265,7 +268,7 @@ static void LC_Tick(float curTime)
 		}
 		
 		// draw the HUD
-		if (curTime >= LC_NextHUDAt[victim])
+		/*if (curTime >= LC_NextHUDAt[victim])
 		{
 			static char partnerStr[65];
 			GetClientName(partner, partnerStr, sizeof(partnerStr));
@@ -273,7 +276,7 @@ static void LC_Tick(float curTime)
 			ShowHudText(victim, -1, LC_AfflictionMessage, partnerStr);
 			
 			LC_NextHUDAt[victim] = curTime + 0.1;
-		}
+		}*/
 		
 		// any reason to go on?
 		if (!(curTime >= LC_NextAttractionAt[victim] || curTime >= LC_NextDamageAt[victim] || curTime >= LC_NextBeamAt[victim]))

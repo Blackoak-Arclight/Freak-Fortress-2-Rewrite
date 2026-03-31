@@ -52,6 +52,7 @@ ConVar CvarFriendlyFire;
 
 #include "arclight_abilities/bosses/announcer.sp"
 #include "arclight_abilities/bosses/captain_kinky.sp"
+#include "arclight_abilities/bosses/demopan.sp"
 #include "arclight_abilities/bosses/heffe.sp"
 #include "arclight_abilities/bosses/hhh.sp"
 #include "arclight_abilities/bosses/improved_saxton.sp"
@@ -222,6 +223,11 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 	CustomAttrib_CalcIsAttackCritical(client, weapon);
 	//CustomMelee_CalcIsAttackCritical(weapon, weaponname);
 	return Plugin_Continue;
+}
+
+public void TF2_OnConditionRemoved(int client, TFCond condition)
+{
+	Demopan_ConditionRemoved(client, condition);
 }
 
 public void FF2R_OnBossCreated(int client, BossData cfg, bool setup)
