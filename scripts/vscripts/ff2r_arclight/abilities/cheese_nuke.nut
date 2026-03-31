@@ -64,7 +64,7 @@ function CheeseNuke(hClient, tAbility)
 		if(hEntity != hClient && PlayerAlive(hEntity) && hEntity.GetTeam() != iTeam)
 		{
 			local vecOther = hEntity.GetOrigin()
-			local vecKnockback = vecOrigin - vecOther
+			local vecKnockback = vecOther - vecOrigin
 			local flDist = vecKnockback.Length()
 			if(flDist > flRange)
 				continue
