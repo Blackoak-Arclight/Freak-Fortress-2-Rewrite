@@ -60,7 +60,8 @@ static void Delirium(int client, AbilityData cfg)
 	float distance = cfg.GetFloat("distance", 800.0);
 	distance *= distance;
 
-	float duration = GetGameTime() + cfg.GetFloat("duration", 8.0);	
+	float duration = cfg.GetFloat("duration", 8.0);	
+	float gameTime = GetGameTime();
 
 	int team = GetClientTeam(client);
 	
@@ -81,11 +82,11 @@ static void Delirium(int client, AbilityData cfg)
 				DataPack pack;
 				DrugTimer[i] = CreateDataTimer(duration / 6.1, fxDrug_Timer, pack, TIMER_REPEAT);
 				pack.WriteCell(i);
-				pack.WriteFloat(duration);
+				pack.WriteFloat(gameTime + duration);
 
 				pack = new DataPack();
 				pack.WriteCell(GetClientUserId(i));
-				pack.WriteFloat(duration);
+				pack.WriteFloat(gameTime + duration);
 				pack.WriteFloat(angs[0]);
 				pack.WriteFloat(angs[1]);
 				pack.WriteFloat(angs[2]);
