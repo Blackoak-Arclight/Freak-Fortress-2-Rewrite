@@ -52,8 +52,8 @@ function Attributes_OnTakeDamage(params)
 			{
 				if(strName in g_AttributeList)
 				{
-					if("OnDealDamage" in g_AttributeList[params.name])
-						g_AttributeList[params.name]["OnDealDamage"](params, value)
+					if("OnDealDamage" in g_AttributeList[strName])
+						g_AttributeList[strName]["OnDealDamage"](params, value)
 				}
 			}
 		}
