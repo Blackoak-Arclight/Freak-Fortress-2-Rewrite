@@ -37,6 +37,18 @@
 		
 		"plugin_name"	"ff2r_arclight_abilities"
 	}
+
+	
+	"rage_heffe_dome"
+	{
+		"slot"			"0"			// Ability slot
+		"distance"		"600.0"		// Distance
+		"duration"		"10.0"		// Duration
+		"color"			"255 255 0"	// RGB
+		"fade"			"155"		// Fade Alpha (0 to disable)
+		
+		"plugin_name"	"ff2r_arclight_abilities"
+	}
 */
 
 static int g_Smoke;
@@ -75,6 +87,42 @@ void Heffe_Ability(int client, const char[] ability, AbilityData cfg)
 		BossTimers[client].Push(CreateDataTimer(0.1, TauntTimer, pack, TIMER_REPEAT));
 		pack.WriteCell(client);
 		pack.WriteString(ability);
+	}
+	else if(!StrContains(ability, "rage_heffe_dome", false))
+	{
+		int dome = CreateEntityByName("prop_dynamic");
+		if(dome != -1)
+		{
+			float pos[3];
+			GetClientAbsOrigin(client, pos);
+
+			float radius = cfg.GetFloat("distance", 800.0);
+			
+			int r = cfg.GetInt("red", 255);
+			int g = cfg.GetInt("green", 255);
+			int b = cfg.GetInt("blue", 255);
+
+			DispatchKeyValueVector(dome, "origin", pos);
+			DispatchKeyValue(dome, "model", "models/kirillian/brsphere_huge.mdl");
+			DispatchKeyValue(dome, "disableshadows", "1");
+			SetEntPropFloat(dome, Prop_Send, "m_flModelScale", SquareRoot(radius / 10000.0));
+
+			DispatchSpawn(dome);
+
+			SetEntityRenderColor(dome, r, g, b, 255);
+
+			char buffer[64];
+			FormatEx(buffer, sizeof(buffer), "OnUser1 !self:Kill::%f:1", cfg.GetFloat("duration", 5.0));
+			SetVariantString(buffer);
+			AcceptEntityInput(dome, "AddOutput");
+			AcceptEntityInput(dome, "FireUser1");
+
+			DataPack pack;
+			BossTimers[client].Push(CreateDataTimer(0.1, DomeTimer, pack, TIMER_REPEAT));
+			pack.WriteCell(client);
+			pack.WriteCell(EntIndexToEntRef(dome));
+			pack.WriteString(ability);
+		}
 	}
 }
 
@@ -293,7 +341,7 @@ Action SmiteTimer(Handle timer, DataPack pack)
 	pack.ReadString(buffer, sizeof(buffer));
 	BossData boss = FF2R_GetBossData(client);
 	AbilityData cfg = boss.GetAbility(buffer);
-	if(cfg.IsMyPlugin())
+	if(cfg.IsMyPlugin() && IsPlayerAlive(client))
 	{
 		float distance = cfg.GetFloat("distance", 800.0);
 		distance *= distance;
@@ -403,8 +451,10 @@ Action TauntTimer(Handle timer, DataPack pack)
 	pack.ReadString(buffer, sizeof(buffer));
 	BossData boss = FF2R_GetBossData(client);
 	AbilityData cfg = boss.GetAbility(buffer);
-	if(cfg.IsMyPlugin())
+	if(cfg.IsMyPlugin() && IsPlayerAlive(client))
 	{
+		TF2_RemoveCondition(client, TFCond_Taunting);
+
 		// https://developer.valvesoftware.com/wiki/Team_Fortress_2/Scripting/VScript_Examples#Giving_a_taunt
 		int active = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		
@@ -435,6 +485,67 @@ Action TauntTimer(Handle timer, DataPack pack)
 		float duration = cfg.GetFloat("duration", 3.0);
 		if(duration > 0.0)
 			TF2_AddCondition(client, TFCond_MegaHeal, duration);
+	}
+
+	BossTimers[client].Erase(BossTimers[client].FindValue(timer));
+	return Plugin_Stop;
+}
+
+Action DomeTimer(Handle timer, DataPack pack)
+{
+	pack.Reset();
+	int client = pack.ReadCell();
+	int entity = EntRefToEntIndex(pack.ReadCell());
+
+	if(entity != -1)
+	{
+		if(client && IsPlayerAlive(client))
+		{
+			char buffer[64];
+			pack.ReadString(buffer, sizeof(buffer));
+			BossData boss = FF2R_GetBossData(client);
+			AbilityData cfg = boss.GetAbility(buffer);
+			if(cfg.IsMyPlugin())
+			{
+				float pos1[3], pos2[3];
+				GetClientAbsOrigin(client, pos1);
+
+				if(entity != -1)
+					TeleportEntity(entity, pos1);
+				
+				int fade = cfg.GetInt("fade");
+				if(fade > 0)
+				{
+					int r = cfg.GetInt("red", 255);
+					int g = cfg.GetInt("green", 255);
+					int b = cfg.GetInt("blue", 255);
+
+					float distance = cfg.GetFloat("distance", 800.0);
+					distance *= distance;
+
+					int team = GetClientTeam(client);
+
+					for(int target = 1; target <= MaxClients; target++)
+					{
+						if(target == client || !IsClientInGame(target) || !IsPlayerAlive(target))
+							continue;
+						
+						if(GetClientTeam(target) == team)
+							continue;
+						
+						GetClientAbsOrigin(target, pos2);
+						if(GetVectorDistance(pos1, pos2, true) > distance)
+							continue;
+						
+						CreateFade(target, 1000, r, g, b, fade);
+					}
+				}
+
+				return Plugin_Continue;
+			}
+		}
+
+		RemoveEntity(entity);
 	}
 
 	BossTimers[client].Erase(BossTimers[client].FindValue(timer));
