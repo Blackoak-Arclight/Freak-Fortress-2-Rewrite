@@ -7,6 +7,9 @@
 	}
 */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static Handle RageAmmoTimer[MAXTF2PLAYERS];
 
 void Pyromancer_BossCreated(int client, BossData cfg)

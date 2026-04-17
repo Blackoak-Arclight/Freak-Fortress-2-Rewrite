@@ -55,7 +55,7 @@ void Goomba_StartTouch(int client, int target)
 						bool heavy = clientWeight > targetWeight;
 
 						SetKillIcon("taunt_scout", "goomba");
-						SDKHooks_TakeDamage(target, client, client, 500.0, DMG_PREVENT_PHYSICS_FORCE, .bypassHooks = false);
+						SDKHooks_TakeDamage(target, client, client, FF2R_GetBossData(target) ? 500.0 : 250.0, DMG_PREVENT_PHYSICS_FORCE, .bypassHooks = false);
 						SetKillIcon();
 
 						pos1[2] += 45.0;

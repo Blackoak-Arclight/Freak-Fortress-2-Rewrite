@@ -33,6 +33,9 @@
 	}
 */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static Handle DrugTimer[MAXTF2PLAYERS];
 static int gLaser1;
 static int gHalo1;

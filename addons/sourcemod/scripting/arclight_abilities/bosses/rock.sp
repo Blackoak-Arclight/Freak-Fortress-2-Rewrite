@@ -50,7 +50,7 @@ void Rock_Ability(int client, const char[] ability, AbilityData cfg)
 			int length = snap.Length;
 			for(int i; i < length; i++)
 			{
-				int size = snap.KeyBufferSize(i) + 1;
+				int size = snap.KeyBufferSize(i);
 				char[] key = new char[size];
 				snap.GetKey(i, key, size);
 

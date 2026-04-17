@@ -12,6 +12,9 @@
  *               - Not recommended for multiple bosses in one battle to have this ability, due to efficiency modifications that were necessary.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 /**
  * RageLoveCurse
  */
@@ -294,7 +297,7 @@ static void LC_Tick(float curTime)
 		{
 			victimPos[2] += 41.5;
 			partnerPos[2] += 41.5;
-			static beamColor[4];
+			static int beamColor[4];
 			beamColor[0] = GetR(LC_BeamColor[curser]);
 			beamColor[1] = GetG(LC_BeamColor[curser]);
 			beamColor[2] = GetB(LC_BeamColor[curser]);

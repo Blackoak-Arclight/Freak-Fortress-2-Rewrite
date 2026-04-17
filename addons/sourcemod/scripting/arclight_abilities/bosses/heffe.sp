@@ -51,6 +51,9 @@
 	}
 */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static int g_Smoke;
 static int g_Glow;
 static int g_Laser;

@@ -293,10 +293,10 @@ void CustomAttrib_CalcIsAttackCritical(int client, int weapon)
 						SDKHooks_TakeDamage(client, 0, client, damage, DMG_PREVENT_PHYSICS_FORCE);
 					
 					float height = 1.0;
-					Attrib_Get(weapon, "wall climb height", _, value);
+					Attrib_Get(weapon, "wall climb height", _, height);
 
 					float speed = 1.0;
-					Attrib_Get(weapon, "wall climb speed", _, value);
+					Attrib_Get(weapon, "wall climb speed", _, speed);
 
 					GetEntPropVector(client, Prop_Data, "m_vecVelocity", vec);
 					vec[0] *= speed;
