@@ -71,6 +71,15 @@ void Heffe_MapStart()
 	PrecacheSound("ambient/explosions/explode_9.wav");
 }
 
+void Heffe_PlayerSpawn(int client)
+{
+	if(NextDamageAt[client])
+	{
+		NextDamageAt[client] = 0.0;
+		SetEntityGravity(client, 1.0);
+	}
+}
+
 void Heffe_Ability(int client, const char[] ability, AbilityData cfg)
 {
 	if(!StrContains(ability, "rage_heffe_rapture", false))
@@ -276,6 +285,7 @@ public Action RaptureEndTouch(int entity, int target)
 {
 	if(target > 0 && target <= MaxClients)
 	{
+		NextDamageAt[target] = 0.0;
 		SetEntityGravity(target, 1.0);
 		TF2_RemoveCondition(target, TFCond_Dazed);
 	}

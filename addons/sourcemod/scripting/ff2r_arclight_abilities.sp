@@ -329,6 +329,7 @@ static void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	if(client)
 	{
 		Announcer_PlayerSpawn(client);
+		Heffe_PlayerSpawn(client);
 	}
 }
 
