@@ -4,10 +4,12 @@
 //#include <dhooks>
 #include <tf_econ_data>
 #include <tf_econ_dynamic>
+#include <adt_trie_sort>
 #include <cfgmap>
 #undef REQUIRE_EXTENSIONS
 #undef REQUIRE_PLUGIN
 #include <ff2r>
+#include <vscript>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -18,13 +20,11 @@
 #define FAR_FUTURE	100000000.0
 #define MAXENTITIES	2048
 
-#define TFTeam_Unassigned	0
-#define TFTeam_Spectator	1
-#define TFTeam_Red		2
-#define TFTeam_Blue		3
-#define TFTeam_MAX		4
+native void FF2_StartMusic(int client);
+native void FF2_StopMusic(int client);
 
 int PlayersAlive[4];
+int PlayersTotal[4];
 bool SpecTeam;
 char KillIcon[64];
 char KillName[64];
@@ -38,6 +38,7 @@ ConVar CvarFriendlyFire;
 #include "freak_fortress_2/subplugin.sp"
 #include "freak_fortress_2/tf2attributes.sp"
 #include "freak_fortress_2/tf2items.sp"
+#include "freak_fortress_2/tf2tools.sp"
 #include "freak_fortress_2/tf2utils.sp"
 #include "freak_fortress_2/vscript.sp"
 
@@ -47,15 +48,18 @@ ConVar CvarFriendlyFire;
 //#include "arclight_abilities/dhooks.sp"
 #include "arclight_abilities/sdkcalls.sp"
 #include "arclight_abilities/sdkhooks.sp"
+#include "arclight_abilities/vscript.sp"
 
 #include "arclight_abilities/weapons/goomba.sp"
 
 #include "arclight_abilities/bosses/announcer.sp"
 #include "arclight_abilities/bosses/captain_kinky.sp"
 #include "arclight_abilities/bosses/demopan.sp"
+#include "arclight_abilities/bosses/gordon.sp"
 #include "arclight_abilities/bosses/heffe.sp"
 #include "arclight_abilities/bosses/hhh.sp"
 #include "arclight_abilities/bosses/improved_saxton.sp"
+#include "arclight_abilities/bosses/noelle.sp"
 #include "arclight_abilities/bosses/phatrages.sp"
 #include "arclight_abilities/bosses/pyromancer.sp"
 #include "arclight_abilities/bosses/rock.sp"
@@ -86,22 +90,33 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+	LoadTranslations("ff2_rewrite.phrases");
+	if(!TranslationPhraseExists("Boss AMS Description"))
+		SetFailState("Translation file \"ff2_rewrite.phrases\" is outdated");
+	
 	CvarFriendlyFire = FindConVar("mp_friendlyfire");
 
 	HookEvent("player_builtobject", OnBuiltObject);
 	HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
+	HookEvent("player_death", OnPlayerDeathPost);
 	HookEvent("player_spawn", OnPlayerSpawn);
 	HookEvent("deploy_buff_banner", OnDeployBanner);
 	HookEvent("object_deflected", OnObjectDeflected);
+	HookEvent("object_destroyed", OnObjectDestoryed, EventHookMode_Pre);
+	HookEvent("teamplay_round_start", OnRoundSetup, EventHookMode_PostNoCopy);
+	HookEvent("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
 	
 	// FF2 Files
 	Attrib_PluginStart();
 	TF2U_PluginStart();
 	TFED_PluginStart();
+	TF2Tools_PluginStart();
 	VScript_PluginStart();
 
 	// Arclight Files
+	ArclightVScript_PluginStart();
 	//DHooks_PluginStart();
+	Noelle_PluginStart();
 	SDKCalls_PluginStart();
 	SDKHook_PluginStart();
 	Sarysapub1_PluginStart();
@@ -137,6 +152,7 @@ void FF2R_PluginLoaded()
 public void OnPluginEnd()
 {
 	//CustomMelee_PluginEnd();
+	Noelle_PluginEnd();
 	Sarysapub1_PluginEnd();
 	OnMapEnd();
 	
@@ -155,7 +171,9 @@ public void OnMapStart()
 {
 	//CustomMelee_MapStart();
 	Goomba_MapStart();
+	Gordon_MapStart();
 	Heffe_MapStart();
+	Noelle_MapStart();
 	PhatRages_MapStart();
 	Saxton_MapStart();
 }
@@ -165,20 +183,29 @@ public void OnMapEnd()
 	
 }
 
+public void OnConfigsExecuted()
+{
+	FindConVar("sv_turbophysics").BoolValue = false;
+}
+
 public void OnLibraryAdded(const char[] name)
 {
+	ArclightVScript_LibraryAdded(name);
 	Attrib_LibraryAdded(name);
 	SDKHook_LibraryAdded(name);
 	Subplugin_LibraryAdded(name);
+	TF2Tools_LibraryAdded(name);
 	TF2U_LibraryAdded(name);
 	TFED_LibraryAdded(name);
 }
 
 public void OnLibraryRemoved(const char[] name)
 {
+	ArclightVScript_LibraryRemoved(name);
 	Attrib_LibraryRemoved(name);
 	SDKHook_LibraryRemoved(name);
 	Subplugin_LibraryRemoved(name);
+	TF2Tools_LibraryRemoved(name);
 	TF2U_LibraryRemoved(name);
 	TFED_LibraryRemoved(name);
 }
@@ -190,11 +217,12 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
-	
+	Noelle_ClientDisconnect(client);
 }
 
 public void OnGameFrame()
 {
+	Noelle_GameFrame();
 	Sarysamods9_GameFrame();
 	Sarysapub1_GameFrame();
 	Saxton_GameFrame();
@@ -203,8 +231,14 @@ public void OnGameFrame()
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
 	CustomAttrib_PlayerRunCmd(client);
+	Gordon_PluginRunCmd(client, buttons);
 	Sarysapub1_PlayerRunCmd(client, buttons);
 	return Saxton_PlayerRunCmd(client, buttons);
+}
+
+public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
+{
+	Noelle_PlayerRunCmdPost(client, buttons);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
@@ -222,12 +256,19 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 {
 	CustomAttrib_CalcIsAttackCritical(client, weapon);
 	//CustomMelee_CalcIsAttackCritical(weapon, weaponname);
+	Gordon_CalcIsAttackCritical(client);
 	return Plugin_Continue;
+}
+
+public void TF2_OnConditionAdded(int client, TFCond condition)
+{
+	Gordon_ConditionAdded(client, condition);
 }
 
 public void TF2_OnConditionRemoved(int client, TFCond condition)
 {
 	Demopan_ConditionRemoved(client, condition);
+	Gordon_ConditionRemoved(client, condition);
 }
 
 public void FF2R_OnBossCreated(int client, BossData cfg, bool setup)
@@ -235,6 +276,8 @@ public void FF2R_OnBossCreated(int client, BossData cfg, bool setup)
 	if(!BossTimers[client])
 		BossTimers[client] = new ArrayList();
 	
+	Gordon_BossCreated(client, cfg);
+	Noelle_BossCreated(client, cfg, setup);
 	Pyromancer_BossCreated(client, cfg);
 	Sarysamods9_BossCreated(client, cfg, setup);
 	Sarysapub1_BossCreated(client, cfg, setup);
@@ -243,12 +286,15 @@ public void FF2R_OnBossCreated(int client, BossData cfg, bool setup)
 
 public void FF2R_OnBossEquipped(int client, bool weapons)
 {
+	Gordon_BossEquipped(client, weapons);
 	Pyromancer_BossEquipped(client, weapons);
 	Saxton_BossEquipped(client, weapons);
 }
 
 public void FF2R_OnBossRemoved(int client)
 {
+	Gordon_BossRemoved(client);
+	Noelle_BossRemoved(client);
 	Pyromancer_BossRemoved(client);
 	Sarysamods9_BossRemoved(client);
 	Sarysapub1_BossRemoved(client);
@@ -264,10 +310,12 @@ public void FF2R_OnBossRemoved(int client)
 
 public void FF2R_OnAbility(int client, const char[] ability, AbilityData cfg)
 {
+	Gordon_Ability(client, ability, cfg);
 	Heffe_Ability(client, ability, cfg);
 	HHH_Ability(client, ability, cfg);
 	Rock_Ability(client, ability, cfg);
 	CK_Ability(client, ability, cfg);
+	Noelle_Ability(client, ability, cfg);
 	PhatRages_Ability(client, ability, cfg);
 	Sarysamods9_Ability(client, ability);
 	Sarysapub1_Ability(client, ability, cfg);
@@ -281,9 +329,12 @@ public void FF2R_OnAliveChanged(const int alive[4], const int total[4])
 	for(int i; i < 4; i++)
 	{
 		PlayersAlive[i] = alive[i];
+		PlayersTotal[i] = total[i];
 	}
 	
 	SpecTeam = (total[TFTeam_Unassigned] || total[TFTeam_Spectator]);
+
+	Noelle_AliveChanged();
 }
 
 static void OnBuiltObject(Event event, const char[] name, bool dontBroadcast)
@@ -312,6 +363,7 @@ static Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 
 	if(KillIcon[0])
 	{
+		event.SetInt("customkill", 0);
 		event.SetString("weapon", KillIcon);
 		if(KillName[0])
 			event.SetString("weapon_logclassname", KillName);
@@ -322,6 +374,15 @@ static Action OnPlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	return action;
 }
 
+static void OnPlayerDeathPost(Event event, const char[] name, bool dontBroadcast)
+{
+	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	int flags = event.GetInt("death_flags");
+
+	Noelle_PlayerDeath(victim, attacker, flags);
+}
+
 static void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
@@ -330,6 +391,7 @@ static void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	{
 		Announcer_PlayerSpawn(client);
 		Heffe_PlayerSpawn(client);
+		Noelle_PlayerSpawned(client);
 	}
 }
 
@@ -343,11 +405,39 @@ static void OnDeployBanner(Event event, const char[] name, bool dontBroadcast)
 	}
 }
 
-static Action OnObjectDeflected(Event event, const char[] name, bool dontBroadcast)
+static void OnObjectDeflected(Event event, const char[] name, bool dontBroadcast)
 {
 	int attacker = GetClientOfUserId(event.GetInt("userid"));
 	if(attacker)
 		CustomAttrib_ObjectDeflected(attacker);
+}
+
+static Action OnObjectDestoryed(Event event, const char[] name, bool dontBroadcast)
+{
+	char buffer[64];
+	event.GetString("weapon", buffer, sizeof(buffer));
+	if(StrContains(buffer, "building_carried_destroyed", false) != -1)
+		return Plugin_Continue;
 	
-	return Plugin_Continue;
+	return OnPlayerDeath(event, name, dontBroadcast);
+}
+
+static void OnRoundSetup(Event event, const char[] name, bool dontBroadcast)
+{
+	Noelle_RoundStart();
+}
+
+static void OnRoundEnd(Event event, const char[] name, bool dontBroadcast)
+{
+	Noelle_RoundEnd();
+}
+
+public Action OnStomp(int attacker, int victim, float &damageMultiplier, float &damageBonus, float &JumpPower)
+{
+	Action action;
+	
+	UpdateAction(action, Noelle_OnStomp(attacker, victim));
+	UpdateAction(action, Saxton_Stomp(attacker, victim));
+
+	return action;
 }

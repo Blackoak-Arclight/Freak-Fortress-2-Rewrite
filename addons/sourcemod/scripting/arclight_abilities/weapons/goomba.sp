@@ -44,7 +44,8 @@ void Goomba_StartTouch(int client, int target)
 				{
 					GoombaCooldown[client] = gameTime;
 
-					if(Saxton_Stomp(client, target) < Plugin_Handled)
+					float multi, bonus, power;
+					if(OnStomp(client, target, multi, bonus, power) < Plugin_Handled)
 					{
 						int health = GetClientHealth(target);
 

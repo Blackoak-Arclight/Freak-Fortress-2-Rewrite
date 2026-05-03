@@ -2155,14 +2155,13 @@ void Bosses_SetSpeed(int client)
 		{
 			// Get the slowest class, eg. lastman scout will speed up the boss
 			
-			maxspeed += 70.0;
-			float lowest = maxspeed;
+			float lowest = maxspeed + 140.0;
 			int team = GetClientTeam(client);
 			for(int target = 1; target <= MaxClients; target++)
 			{
 				if(target != client && IsClientInGame(target) && IsPlayerAlive(target) && GetClientTeam(target) != team)
 				{
-					float sped = GetEntPropFloat(target, Prop_Send, "m_flMaxspeed") * 1.075;
+					float sped = GetEntPropFloat(target, Prop_Send, "m_flMaxspeed") * 1.15;
 					if(sped < lowest)
 						lowest = sped;
 				}

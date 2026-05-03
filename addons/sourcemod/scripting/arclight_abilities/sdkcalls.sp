@@ -5,6 +5,7 @@ static Handle SDKEquipWearable;
 static Handle SDKGetMaxHealth;
 static Handle SDKAddObject;
 static Handle SDKRemoveObject;
+static Handle SDKDeflected;
 
 void SDKCalls_PluginStart()
 {
@@ -45,6 +46,14 @@ void SDKCalls_PluginStart()
 	SDKRemoveObject = EndPrepSDKCall();
 	if(!SDKRemoveObject)
 		LogError("[Gamedata] Could not find CTFPlayer::RemoveObject");
+
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::Deflected");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_Plain);
+	SDKDeflected = EndPrepSDKCall();
+	if(!SDKDeflected)
+		LogError("[Gamedata] Could not find CBaseEntity::Deflected");
 	
 	delete gamedata;
 }
@@ -76,4 +85,10 @@ void SDKCall_RemoveObject(int client, int entity)
 {
 	if(SDKRemoveObject)
 		SDKCall(SDKRemoveObject, client, entity);
+}
+
+void SDKCall_Deflected(int entity, int deflector, const float dir[3])
+{
+	if(SDKDeflected)
+		SDKCall(SDKDeflected, entity, deflector, dir);
 }

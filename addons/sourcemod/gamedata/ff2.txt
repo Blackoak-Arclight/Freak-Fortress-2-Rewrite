@@ -179,6 +179,13 @@
 				"windows"	"97"
 				"windows64"	"97"
 			}
+			"CBaseEntity::Deflected"
+			{
+				"linux"		"161"
+				"linux64"	"161"
+				"windows"	"160"
+				"windows64"	"160"
+			}
 			"CBaseEntity::ShouldTransmit"
 			{
 				"linux"		"21"

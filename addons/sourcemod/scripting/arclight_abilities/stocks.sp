@@ -55,6 +55,25 @@ enum // Collision_Group_t in const.h
 	LAST_SHARED_COLLISION_GROUP
 };
 
+enum
+{
+	EF_BONEMERGE			= 0x001,	// Performs bone merge on client side
+	EF_BRIGHTLIGHT 			= 0x002,	// DLIGHT centered at entity origin
+	EF_DIMLIGHT 			= 0x004,	// player flashlight
+	EF_NOINTERP				= 0x008,	// don't interpolate the next frame
+	EF_NOSHADOW				= 0x010,	// Don't cast no shadow
+	EF_NODRAW				= 0x020,	// don't draw entity
+	EF_NORECEIVESHADOW		= 0x040,	// Don't receive no shadow
+	EF_BONEMERGE_FASTCULL	= 0x080,	// For use with EF_BONEMERGE. If this is set, then it places this ent's origin at its
+										// parent and uses the parent's bbox + the max extents of the aiment.
+										// Otherwise, it sets up the parent's bones every frame to figure out where to place
+										// the aiment, which is inefficient because it'll setup the parent's bones even if
+										// the parent is not in the PVS.
+	EF_ITEM_BLINK			= 0x100,	// blink an item so that the user notices it.
+	EF_PARENT_ANIMATES		= 0x200,	// always assume that the parent entity is animating
+	EF_MAX_BITS = 10
+};
+
 void SetEntityModelScale(int entity, float scale)
 {
 	char buffer[16];
@@ -168,15 +187,6 @@ int TF2_GetClassnameSlot(const char[] classname, bool econ = false)
 	return TFWeaponSlot_Melee;
 }
 
-TFClassType GetClassOfName(const char[] buffer)
-{
-	TFClassType class = view_as<TFClassType>(StringToInt(buffer));
-	if(class == TFClass_Unknown)
-		class = TF2_GetClass(buffer);
-	
-	return class;
-}
-
 void GetClassWeaponClassname(TFClassType class, char[] name, int length)
 {
 	if(!StrContains(name, "saxxy"))
@@ -212,6 +222,18 @@ int TotalPlayersAliveEnemy(int team = -1)
 	{
 		if(i != team)
 			amount += PlayersAlive[i];
+	}
+	
+	return amount;
+}
+
+int TotalPlayersEnemy(int team = -1)
+{
+	int amount;
+	for(int i = SpecTeam ? 0 : 2; i < sizeof(PlayersTotal); i++)
+	{
+		if(i != team)
+			amount += PlayersTotal[i];
 	}
 	
 	return amount;
@@ -1043,6 +1065,16 @@ void ApplyAllyHealEvent(int healer, int patient, int amount)
 	event.Fire();
 }
 
+void ApplySelfHealEvent(int entindex, int amount)
+{
+	Event event = CreateEvent("player_healonhit", true);
+
+	event.SetInt("entindex", entindex);
+	event.SetInt("amount", amount);
+
+	event.Fire();
+}
+
 stock void TF2_Explode(int iAttacker = -1, float flPos[3], float flDamage, float flRadius, const char[] strParticle, const char[] strSound)
 {
 	int iBomb = CreateEntityByName("tf_generic_bomb");
@@ -1079,7 +1111,6 @@ bool TraceRay_DontHitPlayersAndObjects(int entity, int contentsMask, int data)
 	GetEntityClassname(entity, classname, sizeof(classname));
 	return StrContains(classname, "obj_") != 0;
 }
-
 
 stock void SetForceButtonState(int client, bool apply, int button_flag)
 {
@@ -1163,7 +1194,13 @@ float GetFormula(ConfigData cfg, const char[] key, int players, float defaul = 0
 	if(!cfg.GetString(key, buffer, sizeof(buffer)))
 		return defaul;
 	
-	return ParseFormula(buffer, players);
+	return ParseExpr(buffer, Formula_BasicValue, players);
+}
+
+void Formula_BasicValue(const char[] var_name, int var_name_len, float &f, any data)
+{
+	if(CharToLower(var_name[0]) == 'n' || CharToLower(var_name[0]) == 'x')
+		f = data;
 }
 
 void CreateAttachedAnnotation(int client, int entity, bool effect, float time, const char[] buffer, any ...)
@@ -1194,4 +1231,21 @@ void CreateFade(int client, int duration = 2000, int red = 255, int green = 255,
 	bf.WriteByte(blue);
 	bf.WriteByte(alpha);
 	EndMessage();
+}
+
+bool GetBossNameCfg(ConfigData cfg, char[] buffer, int length, int lang = -1, const char[] string = "name")
+{
+	if(lang != -1)
+	{
+		GetLanguageInfo(lang, buffer, length);
+		Format(buffer, length, "%s_%s", string, buffer);
+		if(!cfg.GetString(buffer, buffer, length))
+			cfg.GetString(string, buffer, length);
+	}
+	else
+	{
+		cfg.GetString(string, buffer, length);
+	}
+	
+	return view_as<bool>(buffer[0]);
 }

@@ -109,6 +109,24 @@ void CustomAttrib_AllPluginsLoaded()
 	attrib.SetCustom("description_ff2_string", "");
 	attrib.Register();
 
+	attrib.SetName("mod shotgun altfire");
+	attrib.SetClass("arclight.gordonshotgun");
+	attrib.SetDescriptionFormat("additive");
+	attrib.SetCustom("description_ff2_string", "Alt-Fire: Fire two shells at once");
+	attrib.Register();
+
+	attrib.SetName("mod metal grenade altfire");
+	attrib.SetClass("arclight.gordonsmg");
+	attrib.SetDescriptionFormat("additive");
+	attrib.SetCustom("description_ff2_string", "Alt-Fire: Launches a grenade. Costs %s metal.");
+	attrib.Register();
+
+	attrib.SetName("mod metal ball altfire");
+	attrib.SetClass("arclight.gordonar");
+	attrib.SetDescriptionFormat("additive");
+	attrib.SetCustom("description_ff2_string", "Alt-Fire: Launches a energy ball. Costs %s metal.");
+	attrib.Register();
+
 	attrib.SetClass("arclight.displayonly");
 	attrib.SetDescriptionFormat("additive");
 	attrib.SetCustom("description_ff2_string", "%s");

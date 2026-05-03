@@ -20,16 +20,6 @@ static bool WasHandScaled[MAXTF2PLAYERS];
 void SDKHook_PluginStart()
 {
 	OTDLoaded = LibraryExists(OTD_LIBRARY);
-
-	if(!OTDLoaded)
-	{
-		for(int client = 1; client <= MaxClients; client++)
-		{
-			if(IsClientInGame(client))
-				SDKHook(client, SDKHook_OnTakeDamage, OnPlayerTakeDamage);
-		}
-	}
-
 	AddNormalSoundHook(HookSound);
 }
 
@@ -68,6 +58,7 @@ void SDKHooks_PutInServer(int client)
 	
 	SDKHook(client, SDKHook_OnTakeDamageAlivePost, OnPlayerTakeDamagePost);
 	SDKHook(client, SDKHook_PreThink, OnPreThink);
+	SDKHook(client, SDKHook_PostThink, OnPostThink);
 	SDKHook(client, SDKHook_StartTouch, OnStartTouch);
 	SDKHook(client, SDKHook_WeaponSwitchPost, OnWeaponSwitchPost);
 }
@@ -77,10 +68,16 @@ void SDKHooks_EntityCreated(int entity, const char[] classname)
 	if(!StrContains(classname, "obj_"))
 	{
 		SDKHook(entity, SDKHook_OnTakeDamage, OnObjectTakeDamage);
+		SDKHook(entity, SDKHook_OnTakeDamagePost, OnObjectTakeDamagePost);
 	}
 	else if(!StrContains(classname, "tf_projectile_"))
 	{
 		SDKHook(entity, SDKHook_StartTouchPost, OnProjectileTouch);
+	}
+	else if(!StrContains(classname, "item_powerup_rune"))
+	{
+		SDKHook(entity, SDKHook_Spawn, OnRuneSpawn);
+		SDKHook(entity, SDKHook_SpawnPost, OnRuneSpawnPost);
 	}
 }
 
@@ -92,6 +89,12 @@ void SDKHooks_UnhookProjectile(int entity)
 static Action OnPreThink(int client)
 {
 	Saxton_PreThink(client);
+	return Plugin_Continue;
+}
+
+static Action OnPostThink(int client)
+{
+	Gordon_ThinkPost(client);
 	return Plugin_Continue;
 }
 
@@ -111,6 +114,10 @@ static void WeaponSwitchFrame(int userid)
 	int client = GetClientOfUserId(userid);
 	if(client)
 	{
+		int weapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+
+		Gordon_WeaponSwitch(client, weapon);
+
 		float value = Attrib_FindOnPlayer(client, "hand scale instant", _, true);
 		if(value != 1.0 || WasHandScaled[client])
 		{
@@ -148,6 +155,7 @@ public Action TF2_OnTakeDamage(int victim, int &attacker, int &inflictor, float 
 
 	UpdateAction(action, CustomAttrib_PlayerTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon, critType));
 	UpdateAction(action, Announcer_PlayerTakeDamage(victim, attacker, damage));
+	UpdateAction(action, Gordon_TakeDamage(victim, attacker, inflictor, damage, damagetype));
 	UpdateAction(action, Sarysapub1_TakeDamage(victim, attacker, inflictor, damage, damagetype));
 
 	return action;
@@ -155,6 +163,8 @@ public Action TF2_OnTakeDamage(int victim, int &attacker, int &inflictor, float 
 
 static void OnPlayerTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype, int weapon, const float damageForce[3], const float damagePosition[3], int damagecustom)
 {
+	Gordon_TakeDamagePost(victim);
+	Noelle_TakeDamagePost(victim, attacker);
 }
 
 static Action OnObjectTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -164,6 +174,11 @@ static Action OnObjectTakeDamage(int victim, int &attacker, int &inflictor, floa
 	UpdateAction(action, CustomAttrib_ObjectTakeDamage(victim, attacker, inflictor, damage, damagetype, weapon));
 	
 	return action;
+}
+
+static void OnObjectTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype, int weapon, const float damageForce[3], const float damagePosition[3], int damagecustom)
+{
+	Noelle_TakeDamagePost(victim, attacker);
 }
 
 static void OnProjectileTouch(int entity, int target)
@@ -177,6 +192,16 @@ static void OnProjectileTouch(int entity, int target)
 			CustomAttrib_ProjectileTouch(owner, weapon, entity);
 		}
 	}
+}
+
+static Action OnRuneSpawn(int entity)
+{
+	return Plugin_Handled;
+}
+
+static void OnRuneSpawnPost(int entity)
+{
+	RemoveEntity(entity);
 }
 
 static Action HookSound(int clients[MAXPLAYERS], int &numClients, char sample[256], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[256], int &seed)
