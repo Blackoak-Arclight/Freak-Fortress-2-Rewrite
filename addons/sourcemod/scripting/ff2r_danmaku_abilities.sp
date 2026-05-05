@@ -222,6 +222,15 @@ static const char ReflectSound[][] =
 #define WAVE_REVIVEWAVE		(1 << 1)
 #define WAVE_REVIVEMARKER	(1 << 2)
 
+#if !defined __tf_ontakedamage_included
+enum CritType
+{
+	CritType_None = 0,
+	CritType_MiniCrit,
+	CritType_Crit
+};
+#endif
+
 ConVar CvarFriendlyFire;
 ConVar CvarTeutons;
 ConVar CvarRankLose;
