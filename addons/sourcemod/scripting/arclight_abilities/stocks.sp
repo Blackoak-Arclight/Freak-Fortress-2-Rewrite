@@ -1212,12 +1212,12 @@ void CreateAttachedAnnotation(int client, int entity, bool effect, float time, c
 	Event event = CreateEvent("show_annotation", true);
 	event.SetInt("follow_entindex", entity);
 	event.GetFloat("lifetime", time);
-	event.SetInt("visibilityBitfield", (1 << client));
 	event.SetBool("show_effect", effect);
 	event.SetString("text", message);
 	event.SetString("play_sound", "vo/null.mp3");
 	event.SetInt("id", entity);
-	event.Fire();
+	event.FireToClient(client);
+	event.Cancel();
 }
 
 void CreateFade(int client, int duration = 2000, int red = 255, int green = 255, int blue = 255, int alpha = 255)
