@@ -3,7 +3,8 @@
 	
 	"rage_vagineer_sentry"
 	{
-		"slot"		"0"	// Ability slot
+		"slot"		"0"		// Ability slot
+		"shake"		"true"	// Shake sentry when idle
 
 		"pda"
 		{
@@ -22,6 +23,8 @@
 #pragma newdecls required
 
 #define MAX_AMMO_LEVEL_1	75
+
+static bool SentryShake[MAXTF2PLAYERS];
 
 void Vagineer_Ability(int client, const char[] ability, AbilityData cfg)
 {
@@ -51,6 +54,8 @@ void Vagineer_Ability(int client, const char[] ability, AbilityData cfg)
 				}
 			}
 		}
+
+		SentryShake[client] = cfg.GetBool("shake", true);
 		
 		SetEntProp(client, Prop_Send, "m_iAmmo", 130, _, 3);
 		FakeClientCommandEx(client, "build 2 0");
@@ -60,7 +65,11 @@ void Vagineer_Ability(int client, const char[] ability, AbilityData cfg)
 void Vagineer_BuiltObject(int client, int building)
 {
 	BossData boss = FF2R_GetBossData(client);
-	if(boss == null || boss.GetAbility("rage_vagineer_sentry") == null)
+	if(boss == null)
+		return;
+	
+	AbilityData ability = boss.GetAbility("rage_vagineer_sentry");
+	if(ability == null)
 		return;
 	
 	int health = TotalPlayersAliveEnemy(GetClientTeam(client)) * 100 + 200;
@@ -72,6 +81,10 @@ void Vagineer_BuiltObject(int client, int building)
 	AcceptEntityInput(building, "SetHealth");	// Sets sentry health
 	
 	SDKCall_RemoveObject(client, building);		// Make the boss not the sentry's original owner so he gets to potentially build more of them
+	
+	int level = ability.GetInt("level", 1);
+	if(level > 1)
+		SetEntProp(building, Prop_Send, "m_iHighestUpgradeLevel", level);
 
 	RequestFrame(SentryFrame, EntIndexToEntRef(building));
 }
@@ -91,24 +104,33 @@ static void SentryFrame(int ref)
 	}
 
 	RequestFrame(SentryFrame, ref);
+
+	if(!GetEntProp(entity, Prop_Send, "m_bPlacing"))
+		SetEntData(entity, FindSendPropInfo("CObjectSentrygun", "m_bServerOverridePlacement") + 28, true, 1);	//m_bForceQuickBuild
 	
-	if(GetEntPropFloat(entity, Prop_Send, "m_flModelScale") != 1.22)
-		SetEntityModelScale(entity, 1.22);
-	
-	if(GetEntProp(entity, Prop_Send, "m_bDisabled"))
-		SetEntProp(entity, Prop_Send, "m_bDisabled", false);
+	if(SentryShake[owner])
+	{
+		if(GetEntPropFloat(entity, Prop_Send, "m_flModelScale") != 1.22)
+			SetEntityModelScale(entity, 1.22);
+		
+		if(GetEntProp(entity, Prop_Send, "m_bDisabled"))
+			SetEntProp(entity, Prop_Send, "m_bDisabled", false);
+	}
 	
 	// m_iState: 0 is being carried or in the process of building, 1 is idle (can be either enabled or disabled), 2 is shooting at a target or being wrangled, 3 is in the process of upgrading
 	if(GetEntProp(entity, Prop_Send, "m_iState") > 0)
 	{
-		static int offsetState;
-		if(!offsetState)
-			offsetState = FindSendPropInfo("CObjectSentrygun", "m_iState");
-		
 		// Set turn rate super crazy
-		SetEntData(entity, offsetState + 24, 1000);	// m_iBaseTurnRate
-		SetEntDataFloat(entity, offsetState + 44, GetRandomFloat(-90.0, 90.0));	// m_vecGoalAngles.x
-		SetEntDataFloat(entity, offsetState + 48, GetRandomFloat(0.0, 360.0));	// m_vecGoalAngles.y
+		if(SentryShake[owner])
+		{
+			static int offsetState;
+			if(!offsetState)
+				offsetState = FindSendPropInfo("CObjectSentrygun", "m_iState");
+			
+			SetEntData(entity, offsetState + 24, 1000);	// m_iBaseTurnRate
+			SetEntDataFloat(entity, offsetState + 44, GetRandomFloat(-90.0, 90.0));	// m_vecGoalAngles.x
+			SetEntDataFloat(entity, offsetState + 48, GetRandomFloat(0.0, 360.0));	// m_vecGoalAngles.y
+		}
 		
 		static int offsetAmmo;
 		if(!offsetAmmo)

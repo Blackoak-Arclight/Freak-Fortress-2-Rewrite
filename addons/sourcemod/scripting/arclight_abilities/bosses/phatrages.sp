@@ -87,6 +87,8 @@ static void Delirium(int client, AbilityData cfg)
 				pack.WriteCell(i);
 				pack.WriteFloat(gameTime + duration);
 
+				TriggerTimer(DrugTimer[i]);
+
 				pack = new DataPack();
 				pack.WriteCell(GetClientUserId(i));
 				pack.WriteFloat(gameTime + duration);

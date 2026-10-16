@@ -55,6 +55,7 @@ ConVar CvarFriendlyFire;
 #include "arclight_abilities/bosses/announcer.sp"
 #include "arclight_abilities/bosses/captain_kinky.sp"
 #include "arclight_abilities/bosses/demopan.sp"
+#include "arclight_abilities/bosses/glitched.sp"
 #include "arclight_abilities/bosses/gordon.sp"
 #include "arclight_abilities/bosses/heffe.sp"
 #include "arclight_abilities/bosses/hhh.sp"
@@ -275,6 +276,7 @@ public void FF2R_OnBossCreated(int client, BossData cfg, bool setup)
 	if(!BossTimers[client])
 		BossTimers[client] = new ArrayList();
 	
+	Glitched_BossCreated(client, cfg, setup);
 	Gordon_BossCreated(client, cfg);
 	Noelle_BossCreated(client, cfg, setup);
 	Pyromancer_BossCreated(client, cfg);
@@ -292,6 +294,7 @@ public void FF2R_OnBossEquipped(int client, bool weapons)
 
 public void FF2R_OnBossRemoved(int client)
 {
+	Glitched_BossRemoved(client);
 	Gordon_BossRemoved(client);
 	Noelle_BossRemoved(client);
 	Pyromancer_BossRemoved(client);
@@ -309,6 +312,7 @@ public void FF2R_OnBossRemoved(int client)
 
 public void FF2R_OnAbility(int client, const char[] ability, AbilityData cfg)
 {
+	Glitched_Ability(client, ability, cfg);
 	Gordon_Ability(client, ability, cfg);
 	Heffe_Ability(client, ability, cfg);
 	HHH_Ability(client, ability, cfg);
@@ -377,9 +381,11 @@ static void OnPlayerDeathPost(Event event, const char[] name, bool dontBroadcast
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	int attacker = GetClientOfUserId(event.GetInt("attacker"));
-	int flags = event.GetInt("death_flags");
+	int damagebits = event.GetInt("damagebits");
+	int death_flags = event.GetInt("death_flags");
 
-	Noelle_PlayerDeath(victim, attacker, flags);
+	Glitched_PlayerDeath(victim, attacker, damagebits);
+	Noelle_PlayerDeath(victim, attacker, death_flags);
 }
 
 static void OnPlayerSpawn(Event event, const char[] name, bool dontBroadcast)

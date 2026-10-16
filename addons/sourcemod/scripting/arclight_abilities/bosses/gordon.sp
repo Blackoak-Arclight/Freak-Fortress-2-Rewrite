@@ -107,6 +107,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static float GravityGunHighlights;
 static int OverlayTipButton[MAXTF2PLAYERS];
 static int OverlayTipCycle[MAXTF2PLAYERS];
 static Handle OverlayTipTimer[MAXTF2PLAYERS];
@@ -898,6 +899,58 @@ void Gordon_PluginRunCmd(int client, int buttons)
 				}
 			}
 			delete trace;
+		}
+	}
+
+	if(!GravityGunHighlights || GravityGunHighlights < GetGameTime())
+	{
+		if(gunout && GravityGunHeldProp[client] == -1)
+		{
+			GravityGunHighlights = GetGameTime() + 0.5;
+			
+			char buffer[4];
+			for(int entity = MaxClients	+ 1; entity < 2048; entity++)
+			{
+				// If their valid
+				if(!IsValidEntity(entity))
+					continue;
+				
+				// If they even have a model
+				if(!GetEntPropString(entity, Prop_Data, "m_ModelName", buffer, sizeof(buffer)) || !StrEqual(buffer, "mod", false))
+					continue;
+
+				// Replicated origin to the player
+				if(!HasEntProp(entity, Prop_Send, "m_vecOrigin") || !HasEntProp(entity, Prop_Send, "m_fEffects"))
+					continue;
+				
+				int effects = GetEntProp(entity, Prop_Send, "m_fEffects");
+				if(!(effects & EF_ITEM_BLINK))
+					SetEntProp(entity, Prop_Send, "m_fEffects", effects | EF_ITEM_BLINK);
+			}
+		}
+		else if(GravityGunHighlights)
+		{
+			GravityGunHighlights = 0.0;
+			
+			char buffer[4];
+			for(int entity = MaxClients	+ 1; entity < 2048; entity++)
+			{
+				// If their valid
+				if(!IsValidEntity(entity))
+					continue;
+				
+				// If they even have a model
+				if(!GetEntPropString(entity, Prop_Data, "m_ModelName", buffer, sizeof(buffer)) || !StrEqual(buffer, "mod", false))
+					continue;
+
+				// Replicated origin to the player
+				if(!HasEntProp(entity, Prop_Send, "m_vecOrigin") || !HasEntProp(entity, Prop_Send, "m_fEffects"))
+					continue;
+				
+				int effects = GetEntProp(entity, Prop_Send, "m_fEffects");
+				if(effects & EF_ITEM_BLINK)
+					SetEntProp(entity, Prop_Send, "m_fEffects", effects - EF_ITEM_BLINK);
+			}
 		}
 	}
 }
