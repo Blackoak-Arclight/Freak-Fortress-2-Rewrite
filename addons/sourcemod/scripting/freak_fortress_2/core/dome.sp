@@ -296,6 +296,8 @@ static void Dome_Frame_Prepare()
 		return;
 
 	float time = GetGameTime() - DomeStart;
+	if(time < 0.0)	//DomeStart is ahead of server time if dome started inside a player's usercmd
+		time = 0.0;
 
 	if(time < DOME_PERPARE_DURATION)
 	{
