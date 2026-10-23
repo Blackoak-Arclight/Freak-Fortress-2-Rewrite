@@ -1,0 +1,27 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/vee/noelle/NoelleDarkWorldTex"
+	"$bumpmap" "models/vee/noelle/normal"
+	
+	"$basemapalphaphongmask" "1"
+    $rimlightmask "1" 
+	$phong 1
+	$phongfresnelranges "[0.5 0.75 1]"
+	$halflambert 1
+	$phongexponent 5
+	$phongboost				"0.12"
+	$rimlight              "1"
+	$rimlightexponent       "2"
+	$rimlightboost          "1.2"		
+	$phongfresnelranges	"[.1 0.6 3]"
+    $AmbientOcclusion "1" 
+	// Cloaking
+	"$cloakPassEnabled" "1"
+
+	"Proxies"
+	{
+		"spy_invis"
+		{
+		}
+	}
+}

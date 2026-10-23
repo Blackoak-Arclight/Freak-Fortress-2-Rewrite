@@ -1,0 +1,17 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/player/pony/megapony/gem_rocket"
+
+	"$selfillum" "1"
+	"$selfillumint" "[0 0 1]"
+	"$model" 					"1"
+	"$phong" 					"1"
+	"$basemapalphaphongmask" 	"1"
+	"$phongexponent" 			"1"
+	"$phongboost" 				"0.6	"
+	"$phongalbedotint" 			"1"
+	"$phongtint" 				"[1 .95 .95]"
+	"$phongfresnelranges"		"[0.5 6 10]"
+
+	"$ambientocclusion" 		"1"
+}
