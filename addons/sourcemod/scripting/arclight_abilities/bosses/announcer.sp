@@ -145,7 +145,7 @@ static Action AnnouncerSwapTimer(Handle timer, int client)
 			
 			TF2_RegeneratePlayer(client);
 			
-			entity = GetEntPropEnt(iClient, Prop_Send, "m_hActiveWeapon");
+			entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			if(entity > MaxClients)
 			{
 				char classname[32];
