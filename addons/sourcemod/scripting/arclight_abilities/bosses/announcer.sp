@@ -143,21 +143,21 @@ static Action AnnouncerSwapTimer(Handle timer, int client)
 					SDKCall_AddObject(client, entity);
 			}
 			
-			TF2_RegeneratePlayer(client);
-			
 			entity = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 			if(entity > MaxClients)
 			{
 				char classname[32];
 				GetEntityClassname(entity, classname, sizeof(classname));
 				
-				//Minigun bug with status during team switch while attacking
+				//Team switch removes the minigun slow while still revved, regenerate will apply speed
 				if(StrEqual(classname, "tf_weapon_minigun"))
 				{
-					if(GetEntProp(entity, Prop_Send, "m_iWeaponState") > 1)
-						SetEntProp(entity, Prop_Send, "m_iWeaponState", 0);
+					if(GetEntProp(entity, Prop_Send, "m_iWeaponState") > 0)
+						TF2_AddCondition(client, TFCond_Slowed);
 				}
 			}
+			
+			TF2_RegeneratePlayer(client);
 			
 			//Give crit resistance 
 			TF2_AddCondition(client, TFCond_DefenseBuffed);
